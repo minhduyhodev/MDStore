@@ -32,7 +32,7 @@
 **Mục tiêu:** Người dùng có thể tự thao tác mua hàng và xem lịch sử trên giao diện.
 
 **Frontend:**
-- [ ] Khởi tạo Vite + ReactJS + Tailwind CSS
+- [ ] Khởi tạo Next.js App Router + JavaScript + Tailwind CSS
 - [ ] UI/UX trang chủ (Danh sách sản phẩm)
 - [ ] Tính năng Giỏ hàng / Đặt hàng
 - [ ] Màn hình lịch sử đơn hàng & Chi tiết tài khoản đã giao

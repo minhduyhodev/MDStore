@@ -23,5 +23,8 @@ public record SupplierProduct(
         BigDecimal supplyPrice,
 
         /** item.is_active AND item.stock > 0 */
-        boolean isActive
+        boolean isActive,
+        
+        /** Flash sale ID lấy từ API (nếu có) */
+        String flashSaleId
 ) {}

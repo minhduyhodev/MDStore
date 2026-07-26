@@ -56,40 +56,34 @@
 
 ---
 
-## Current focus (đang làm — LUÔN chỉ có 1 task ở đây)
+### Task: Cập nhật luồng xử lý lỗi PRICE_CHANGED trong OrderOrchestrationService
 
-### Task: Viết VietShareConnector (implement SupplierConnector)
+**Trạng thái**: Plan — bước 1/6
 
-**Trạng thái**: Coding — bước 2/6 (Code)
+**1. Plan (phân tích + lên kế hoạch)**
+- [ ] Đọc các file liên quan (ghi rõ file nào): ...
+- [ ] Xác định phạm vi: file/class nào sẽ tạo mới, file nào sẽ sửa
+- [ ] Nếu có điểm mơ hồ ảnh hưởng DB/tiền/bảo mật → dừng, hỏi theo giao thức CLAUDE.md mục 6
+- [ ] Chia nhỏ task thành các bước code cụ thể (liệt kê ra đây)
 
-**1. Plan** ✅ đã xong
-- [x] Đọc docs/04-suppliers/vietshare.md (catalog API đã được document sau Q-002 resolved)
-- [x] Đọc docs/02-decisions.md (ADR-002 Virtual Threads, ADR-003 HMAC, ADR-004 Connector pattern, ADR-007 envelope)
-- [x] Phạm vi: tạo mới toàn bộ project Spring Boot tại `Server/`, sau đó viết `VietShareSigner` và `VietShareConnector.fetchCatalog()`
-- [x] Không có điểm mơ hồ nào cần hỏi (Q-002 đã giải quyết)
-- [x] Chia bước: pom.xml + cấu hình → SupplierConnector interface → VietShareSigner → fetchCatalog() → tests
-
-**2. Code** ✅ fetchCatalog() xong — placeOrder() còn lại
-- [x] Khởi tạo project Spring Boot tại `Server/` (pom.xml, MdstoreApplication, application.yml)
-- [x] `SupplierConnector` interface + model `SupplierProduct`, `OrderRequest`, `OrderResult`
-- [x] `VietShareProperties` (@ConfigurationProperties)
-- [x] `VietShareSigner` — canonical string + HMAC-SHA256
-- [x] `VietShareConnector.fetchCatalog()` — gọi GET /v1/products, map sang `List<SupplierProduct>`
-- [ ] `VietShareConnector.placeOrder()` — xử lý mã lỗi 402/409/429/503
+**2. Code**
+- [ ] Bước 2.1: ...
 
 **3. Test**
-- [x] Unit test `VietShareSigner` — **8/8 pass** (format + deterministic HMAC vector)
-- [x] Integration test `fetchCatalog()` bằng WireMock — **9/9 pass** (happy path + errors + is_active logic)
-- [ ] Integration test `placeOrder()` bằng WireMock (case thành công + từng mã lỗi 402/409/429/503)
-- [ ] Chạy `mvn test` toàn bộ sau khi placeOrder() xong — kết quả gần nhất: **17/17 pass** ✅
+- [ ] Viết unit test cho logic mới/thay đổi
 
-**4. Self-review** — chưa tới
-**5. Cập nhật tài liệu** — chưa tới
-**6. Done** — chưa tới
+**4. Self-review (agent tự soát trước khi báo cáo)**
+- [ ] Đọc lại code vừa viết như người review, không phải người viết
 
-**Bước tiếp theo cụ thể**: viết `VietShareConnector.placeOrder()` — POST /v1/orders với
-`Idempotency-Key` header, parse response thành công + từng mã lỗi (402, 409 PRICE_CHANGED,
-409 OUT_OF_STOCK, 429, 503), rồi viết integration test WireMock cho từng case.
+**5. Cập nhật tài liệu (nếu có ảnh hưởng)**
+- [ ] Cập nhật ...
+
+**6. Done — chỉ tick khi 1-5 đã xong hết**
+- [ ] Di chuyển task xuống mục "Done" (1 dòng tóm tắt)
+- [ ] Điền "Bước tiếp theo cụ thể" cho task mới lấy từ Backlog vào Current focus
+
+**Bước tiếp theo cụ thể**: Lên kế hoạch cho luồng PRICE_CHANGED (cập nhật status, gửi thông báo user).
+
 
 ---
 
@@ -100,13 +94,12 @@
 > - `[M]` = cần vài vòng Plan→Test lặp lại
 > - `[L]` = quá to, **PHẢI tách nhỏ hơn nữa trước khi bắt đầu**, không được giữ nguyên
 
-- [ ] [M] Viết ConnectorRegistry + đăng ký VietShareConnector vào Spring context
-- [ ] [M] Viết CatalogSyncService (job đồng bộ 10-30s/lần) ← block bởi Q-002 ✅ đã giải quyết
-- [ ] [M] Viết OrderOrchestrationService: routing logic (chọn supplier theo product_id)
 - [ ] [S] Viết OrderOrchestrationService: PRICE_CHANGED flow (thông báo user, cập nhật order status)
 - [ ] [M] Viết OrderOrchestrationService: retry/backoff (Exponential Backoff, giữ Idempotency-Key)
-- [ ] [S] L.1: Confirm schema `supplier_products` (field list + index, đối chiếu fetchCatalog mapping mới)
-- [ ] [M] L.2: Thiết kế schema `orders` (field list, status enum, indexes)
+- [ ] [S] L.1: Confirm schema `supplier_products` (đã xong một phần, cần review thêm field)
+- [ ] [M] L.2: Thiết kế schema `orders` ✅ (Đã hoàn thành cơ bản qua Routing Logic)
+- [ ] [S] WalletService: Đọc balance qua GET /v1/account từ VietShare (Task mới bổ sung)
+- [ ] [M] OrderReconciliationService: Đối soát đơn qua GET /v1/orders từ VietShare (Task mới bổ sung)
 - [ ] [S] L.4: Viết DDL hoàn chỉnh + cập nhật `03-db-schema.md` (làm sau L.1 và L.2 xong)
 - [ ] [S] Viết Flyway migration script từ DDL đã thiết kế ở L.4
 - [ ] [M] L.3: Thiết kế schema `users` + balance ← **block bởi Q-005** (ví nội bộ vs payment gateway chưa quyết định)
@@ -117,6 +110,14 @@
 ## Done (chỉ 1 dòng/task, chi tiết xem git log)
 
 - [x] 2026-07-26 — Dọn dẹp + sửa lỗi header tài liệu (xem báo cáo đầy đủ bên dưới)
+- [x] 2026-07-26 — Bảo mật secrets: tạo .gitignore, .env.example, ẩn toàn bộ URL/credentials vào env var, sửa application.yml bỏ fallback hardcode, sửa README.md (task chèn ngang)
+- [x] 2026-07-26 — Setup base FE React: Next.js App Router + JavaScript + Tailwind CSS tại client/, layout.js + 3 trang (catalog/orders/wallet) với "use client", api.js xử lý envelope ADR-007, tạo docs/09-frontend.md (task chèn ngang)
+- [x] 2026-07-26 — Viết VietShareConnector (implement SupplierConnector): fetchCatalog, placeOrder, HMAC signer, xử lý response envelope và mock server integration test.
+- [x] 2026-07-26 — Tổ chức lại tầng RESTful API theo domain: tạo cấu trúc web/ cho catalog, order, wallet, supplier với các controller stub, thêm GlobalExceptionHandler và ADR-009.
+- [x] 2026-07-26 — Viết ConnectorRegistry: Quản lý danh sách các SupplierConnector và tự động đăng ký qua Spring injection.
+- [x] 2026-07-26 — Viết CatalogSyncService: Tạo job đồng bộ 10-30s/lần, cập nhật entity SupplierProductEntity vào DB, và ghi Redis cache TTL 60s. Thêm test bằng Mockito.
+- [x] 2026-07-26 — Viết OrderOrchestrationService: Routing logic (chọn supplier theo giá rẻ nhất), tạo OrderEntity lưu vào DB, gọi placeOrder lên Connector và test bằng Mockito. Cấu trúc bảng `orders` (L.2) đã được định hình.
+- [x] 2026-07-26 — Sửa 5 thiếu sót của VietShare API: thêm `REQUEST_IN_PROGRESS`, bổ sung `couponCode` và `flashSaleId` vào luồng đặt đơn, cập nhật tài liệu `vietshare.md`.
 
 ---
 

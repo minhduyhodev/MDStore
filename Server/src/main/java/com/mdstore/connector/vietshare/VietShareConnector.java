@@ -7,7 +7,11 @@ import com.mdstore.connector.SupplierException;
 import com.mdstore.connector.SupplierException.ErrorCode;
 import com.mdstore.connector.SupplierProduct;
 import com.mdstore.connector.vietshare.VietShareSigner.SignedHeaders;
+import com.mdstore.connector.vietshare.dto.VsOrderRequest;
+import com.mdstore.connector.vietshare.dto.VsOrderResponse;
+import com.mdstore.connector.vietshare.dto.VsOrderResponse.VsDeliveredAccount;
 import com.mdstore.connector.vietshare.dto.VsProductListResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -36,10 +40,12 @@ public class VietShareConnector implements SupplierConnector {
     private final RestClient restClient;
     private final VietShareSigner signer;
     private final String apiUrl;
+    private final ObjectMapper objectMapper;
 
-    public VietShareConnector(VietShareProperties props, VietShareSigner signer) {
+    public VietShareConnector(VietShareProperties props, VietShareSigner signer, ObjectMapper objectMapper) {
         this.signer  = signer;
         this.apiUrl  = props.apiUrl();
+        this.objectMapper = objectMapper;
 
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout((int) Duration.ofSeconds(props.connectTimeoutSeconds()).toMillis());
@@ -98,7 +104,8 @@ public class VietShareConnector implements SupplierConnector {
                             item.id(),
                             item.name(),
                             item.price(),
-                            item.isActive() && item.stock() > 0
+                            item.isActive() && item.stock() > 0,
+                            item.flashSaleId()
                     ))
                     .toList();
 
@@ -127,8 +134,63 @@ public class VietShareConnector implements SupplierConnector {
 
     @Override
     public OrderResult placeOrder(OrderRequest request) {
-        // TODO: implement trong bước code tiếp theo
-        throw new UnsupportedOperationException("placeOrder not yet implemented");
+        log.debug("Placing order to VietShare: POST /v1/orders, productCode={}", request.productExternalCode());
+
+        VsOrderRequest vsReq = new VsOrderRequest(
+                request.productExternalCode(),
+                request.quantity(),
+                request.maxUnitPrice(),
+                request.couponCode(),
+                request.flashSaleId()
+        );
+
+        byte[] rawBody;
+        try {
+            rawBody = objectMapper.writeValueAsBytes(vsReq);
+        } catch (Exception e) {
+            throw new SupplierException(ErrorCode.INVALID_REQUEST, "Failed to serialize order request", e);
+        }
+
+        SignedHeaders headers = signer.sign("POST", "/v1/orders", rawBody);
+
+        try {
+            VsOrderResponse response = restClient.post()
+                    .uri("/v1/orders")
+                    .header("X-Shop-API-ID", headers.xShopApiId())
+                    .header("X-Timestamp",   headers.xTimestamp())
+                    .header("X-Nonce",       headers.xNonce())
+                    .header("X-Signature",   headers.xSignature())
+                    .header("Idempotency-Key", request.idempotencyKey())
+                    .body(rawBody)
+                    .retrieve()
+                    .body(VsOrderResponse.class);
+
+            if (response == null || !"success".equals(response.status()) || response.data() == null) {
+                log.warn("VietShare returned invalid order response");
+                throw new SupplierException(ErrorCode.SERVER_ERROR, "Invalid response format from VietShare");
+            }
+
+            List<String> accountDataList = response.data().deliveredAccounts().stream()
+                    .map(VsDeliveredAccount::data)
+                    .toList();
+
+            return new OrderResult(
+                    response.data().orderId(),
+                    response.data().unitPrice(),
+                    accountDataList
+            );
+
+        } catch (HttpClientErrorException e) {
+            return handleClientError(e, "placeOrder");
+        } catch (HttpServerErrorException e) {
+            log.warn("VietShare server error during placeOrder: {}", e.getStatusCode());
+            throw new SupplierException(ErrorCode.SERVER_ERROR,
+                    "VietShare server error: " + e.getStatusCode(), e);
+        } catch (ResourceAccessException e) {
+            log.warn("VietShare timeout during placeOrder", e);
+            throw new SupplierException(ErrorCode.NETWORK_TIMEOUT,
+                    "VietShare request timed out", e);
+        }
     }
 
     // ──────────────────────────────────────────────────────
@@ -164,6 +226,10 @@ public class VietShareConnector implements SupplierConnector {
         if (body.contains("OUT_OF_STOCK")) {
             return new SupplierException(ErrorCode.OUT_OF_STOCK,
                     "Product is out of stock at supplier", cause);
+        }
+        if (body.contains("REQUEST_IN_PROGRESS")) {
+            return new SupplierException(ErrorCode.REQUEST_IN_PROGRESS,
+                    "Request is already being processed, please wait and retry", cause);
         }
         return new SupplierException(ErrorCode.INVALID_REQUEST,
                 "Supplier conflict (409): " + body, cause);

@@ -76,6 +76,8 @@ Ghi xong câu hỏi vào 07-open-questions.md PHẢI dừng hẳn, không code p
 - `04-suppliers/{tên}.md`, `04-suppliers/_template.md`
 - `05-business-flows.md`, `06-glossary.md`, `07-open-questions.md`
 - `08-roadmap.md` (định hướng dài hạn theo Phase — không cập nhật task-level)
+- `09-frontend.md` (cấu trúc + hướng dẫn project Next.js)
+- `10-backend-structure-explained.md` (cấu trúc code backend, luồng chạy, giải thích cho người mới)
 - `PROGRESS.md` (task đang code — cập nhật liên tục)
 
 **Format khi ghi câu hỏi:**
@@ -92,7 +94,7 @@ Không được chọn im lặng như lựa chọn thứ 4.
 
 Danh sách file tài liệu CHÍNH THỨC: `01-overview`, `02-decisions`, `03-db-schema`,
 `04-suppliers/`, `05-business-flows`, `06-glossary`, `07-open-questions`,
-`08-roadmap`, `PROGRESS.md`, `CLAUDE.md` (file này). Không có file nào khác.
+`08-roadmap`, `09-frontend`, `10-backend-structure-explained`, `PROGRESS.md`, `CLAUDE.md` (file này). Không có file nào khác.
 
 - Thiếu thông tin kiến trúc → bổ sung vào `02-decisions.md`, KHÔNG tạo file mới.
 - Thiếu thông tin DB → bổ sung vào `03-db-schema.md`.
@@ -137,6 +139,8 @@ Khi nhận task [L] từ Backlog, agent phải tách nhỏ trước ở giai đo
 | Hiểu tổng thể dự án | `01-overview` → `02-decisions` |
 | Không chắc về một thuật ngữ | `06-glossary` |
 | Hỏi về tiến độ hoặc ưu tiên công việc | `PROGRESS.md` → `08-roadmap.md` |
+| Implement / đọc code Frontend Next.js | `09-frontend.md` |
+| Hiểu cấu trúc package backend, luồng chạy | `10-backend-structure-explained.md` |
 
 ---
 

@@ -75,14 +75,17 @@ Idempotency-Key: {uuid-của-đơn-hàng-nội-bộ}
 {
   "product_code": "VS_NORDVPN_1M",
   "quantity": 1,
-  "max_unit_price": 15000.00
+  "max_unit_price": 15000.00,
+  "coupon_code": "DISCOUNT10",
+  "flash_sale_id": "FS_2026_07"
 }
 ```
 
-**Lưu ý về `max_unit_price`:**
-- Là mức giá tối đa MDStore chấp nhận mua.
+**Lưu ý về `max_unit_price`, `coupon_code`, `flash_sale_id`:**
+- `max_unit_price`: Là mức giá tối đa MDStore chấp nhận mua.
 - Nếu giá VietShare hiện tại **cao hơn** `max_unit_price` → VietShare trả HTTP 409 `PRICE_CHANGED`.
-- Phải lấy từ `supplier_products.supply_price` trong DB, không hardcode.
+- `coupon_code`: Mã giảm giá áp dụng (nếu có).
+- `flash_sale_id`: Gửi kèm nếu sản phẩm này thuộc chương trình flash sale (lấy từ catalog API) để đảm bảo an toàn nếu flash sale vừa kết thúc.
 
 ### Response — Thành công (HTTP 200)
 
@@ -119,6 +122,7 @@ Idempotency-Key: {uuid-của-đơn-hàng-nội-bộ}
 | `401` | `UNAUTHORIZED` | Sai API_KEY hoặc Signature invalid | Ngừng gọi API, alert Admin ngay lập tức. **Không retry.** |
 | `409` | `PRICE_CHANGED` | Giá VietShare > `max_unit_price` | Update `orders.status` → `FAILED_PRICE_CHANGED`. Hoàn tiền user hoặc yêu cầu confirm giá mới. **Không retry.** |
 | `409` | `OUT_OF_STOCK` | Hết hàng | Update `orders.status` → `FAILED_OUT_OF_STOCK`. Hoàn tiền user. **Không retry.** |
+| `409` | `REQUEST_IN_PROGRESS` | Có một request khác đang xử lý | **Bắt buộc giữ Idempotency-Key**, chờ theo header `Retry-After` rồi retry. |
 | `429` | `TOO_MANY_REQUESTS` | Vượt 60 req/min | Update `orders.status` → `PROCESSING_RETRY`. Background job retry với Exponential Backoff. **Giữ nguyên Idempotency-Key.** |
 | `500/503` | `SERVER_ERROR` | Lỗi phía VietShare | Tương tự 429. |
 | Network Timeout | N/A | Không nhận được response | Tương tự 429 — không biết VietShare có nhận được không, **bắt buộc giữ Idempotency-Key khi retry.** |
@@ -175,7 +179,8 @@ X-Signature: {signature}
       "name": "NordVPN 1 Tháng",
       "price": 15000.00,
       "stock": 142,
-      "is_active": true
+      "is_active": true,
+      "flash_sale_id": "FS_2026_07"
     }
   ]
 }
@@ -188,6 +193,7 @@ X-Signature: {signature}
 | `price` | `supplier_products.supply_price` | Giá nhập của MDStore — cộng markup khi bán ra |
 | `stock` | Không lưu DB | Chỉ dùng để set `is_active = false` nếu `stock == 0` |
 | `is_active` | `supplier_products.is_active` | AND với `stock > 0` |
+| `flash_sale_id` | `supplier_products.flash_sale_id` | Truyền lại lúc đặt đơn nếu khác null |
 
 ---
 
@@ -220,12 +226,19 @@ X-Signature: {signature}
 
 ### Tần suất sync & chiến lược cache
 
-- **CatalogSyncService** chạy định kỳ **10–30 giây/lần** (cron job, không phải per-request).
-- Kết quả lưu vào cache (Redis) để `VietShareConnector.fetchCatalog()` đọc từ cache, không gọi API trực tiếp cho từng request của khách.
-- Khi đặt đơn (`POST /v1/orders`): lấy `max_unit_price` từ **cache catalog gần nhất** — không cần gọi lại API giá riêng. Cache cũ vài giây vẫn ổn vì VietShare chốt giá/tồn cuối cùng khi xử lý đơn.
-
+- Tần suất sync & chiến lược cache:
+  - **CatalogSyncService** chạy định kỳ **10–30 giây/lần** (cron job, không phải per-request).
+  - Khi đặt đơn (`POST /v1/orders`): lấy `max_unit_price` và `flash_sale_id` từ **cache catalog gần nhất**.
 
 ---
+
+## Các API Khác
+
+### 1. Lấy số dư ví (`GET /v1/account`)
+- Dùng cho `WalletService` để đối chiếu số dư hiện tại của MDStore trên VietShare.
+
+### 2. Danh sách đơn hàng (`GET /v1/orders`) & Chi tiết đơn (`GET /v1/orders/{order_code}`)
+- Dùng cho `OrderReconciliationService` để đối soát trạng thái đơn hàng khi xảy ra lỗi network hoặc timeout, đảm bảo đồng bộ trạng thái `COMPLETED` / `FAILED` nội bộ với VietShare.
 
 ## Biến Môi Trường Cần Cấu Hình
 

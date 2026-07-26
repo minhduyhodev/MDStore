@@ -70,7 +70,7 @@ Người dùng cuối
 ## Tech Stack (tóm tắt, không phải nguồn sự thật về kỹ thuật)
 
 - Backend: Java 21 + Spring Boot 3.2+
-- Frontend: ReactJS (Vite) + Tailwind CSS + shadcn/ui
+- Frontend: Next.js App Router + JavaScript + Tailwind CSS
 - DB: PostgreSQL 16
 - Cache / Rate Limit: Redis + Bucket4j
 
@@ -97,5 +97,5 @@ MDStore/
 │   ├── 08-roadmap.md          ← Định hướng dài hạn theo Phase
 │   └── PROGRESS.md            ← Task đang code (cập nhật liên tục)
 ├── mdstore-backend/           ← Java 21 + Spring Boot 3.2+
-└── mdstore-frontend/          ← ReactJS + Vite + Tailwind CSS
+└── client/          ← Next.js App Router + JavaScript + Tailwind CSS
 ```

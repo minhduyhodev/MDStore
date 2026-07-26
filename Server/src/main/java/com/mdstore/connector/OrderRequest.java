@@ -12,5 +12,7 @@ public record OrderRequest(
         int quantity,
         BigDecimal maxUnitPrice,
         /** UUID của orders nội bộ MDStore — KHÔNG được tạo mới khi retry (ADR-005) */
-        String idempotencyKey
+        String idempotencyKey,
+        String couponCode,
+        String flashSaleId
 ) {}

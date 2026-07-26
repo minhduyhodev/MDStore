@@ -25,5 +25,8 @@ public record VsProductItem(
         int stock,
 
         @JsonProperty("is_active")
-        boolean isActive
+        boolean isActive,
+        
+        @JsonProperty("flash_sale_id")
+        String flashSaleId
 ) {}

@@ -9,6 +9,7 @@ public class SupplierException extends RuntimeException {
     public enum ErrorCode {
         PRICE_CHANGED,      // HTTP 409 — giá thay đổi, cần user confirm
         OUT_OF_STOCK,       // HTTP 409 — hết hàng
+        REQUEST_IN_PROGRESS,// HTTP 409 — request đang xử lý → retry với Idempotency-Key
         UNAUTHORIZED,       // HTTP 401 — sai API key/signature → alert admin
         INVALID_REQUEST,    // HTTP 400 — lỗi payload → alert dev
         RATE_LIMITED,       // HTTP 429 → retry với backoff (ADR-006)
@@ -35,7 +36,7 @@ public class SupplierException extends RuntimeException {
     /** Trả về true nếu lỗi này nên được retry (theo ADR-006) */
     public boolean isRetryable() {
         return switch (errorCode) {
-            case RATE_LIMITED, SERVER_ERROR, NETWORK_TIMEOUT -> true;
+            case RATE_LIMITED, SERVER_ERROR, NETWORK_TIMEOUT, REQUEST_IN_PROGRESS -> true;
             default -> false;
         };
     }

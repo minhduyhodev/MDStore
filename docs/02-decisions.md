@@ -182,6 +182,41 @@ interface SupplierAdapter {
 
 ---
 
+## ADR-008: Frontend stack dùng Next.js App Router + JavaScript + Tailwind CSS
+
+- **Ngày quyết định:** 2026-07-26
+- **Trạng thái:** Đã chốt ✅
+
+**Lý do:**
+- **Next.js App Router:** Đơn giản hóa quá trình routing bằng cấu trúc thư mục, giảm phụ thuộc vào các thư viện bên thứ 3 (như `react-router-dom`). Tối ưu tốc độ tải trang nhờ Server Components.
+- **JavaScript thuần:** Dễ tiếp cận cho người mới học thay vì phải đối mặt với các lỗi type của TypeScript.
+- **Tailwind CSS:** Giúp code UI nhanh chóng ngay trên class, không cần tạo file CSS rời rạc.
+- **Không dùng Zustand / Redux / TanStack Query (ở giai đoạn này):** Giữ độ phức tạp thấp nhất có thể. Các trang tự gọi API (`useEffect` + `fetch()`) và tự quản lý state (`useState`) để người mới dễ theo dõi luồng dữ liệu trước khi áp dụng các mẫu thiết kế phức tạp.
+
+**Đánh đổi:**
+- Không có TypeScript làm giảm sự chặt chẽ của các prop/state, dễ sinh lỗi runtime do typo.
+- Thiếu TanStack Query dẫn đến việc gọi API không được tối ưu bộ nhớ đệm tự động. (Có thể bổ sung sau khi dự án mở rộng).
+
+> **⚠️ KHÔNG cài thêm thư viện quản lý state (như Redux, Zustand) hay data-fetching (TanStack Query)** trừ khi có ADR mới cập nhật phê duyệt.
+
+---
+
+## ADR-009: Cấu trúc tầng Web theo Domain (Không dùng `web/` chung)
+
+- **Ngày quyết định:** 2026-07-26
+- **Trạng thái:** Đã chốt ✅
+
+**Lý do:**
+- **Domain-Driven Design (DDD):** Để đảm bảo tính đóng gói, toàn bộ code liên quan tới HTTP (Controller, Request/Response DTO) của một domain sẽ nằm trong thư mục `web/` của chính domain đó (ví dụ: `catalog/web/`, `order/web/`). Không tạo một thư mục `web/` ở cấp root (`com.mdstore.web/`) chứa tất cả Controller.
+- **Tách biệt DTO và Domain Model:** Request/Response DTO chỉ tồn tại ở tầng `web/` và dùng để giao tiếp với Client. Tầng `web/` có trách nhiệm convert DTO thành Domain Model trước khi gọi xuống tầng Service/Application.
+- **Envelope Response:** Tuân thủ ADR-007, mọi Controller bắt buộc trả về kiểu `ApiResponse<T>`. Lỗi được bắt tập trung bằng `@RestControllerAdvice` trong `common/web/GlobalExceptionHandler.java`.
+
+**Đánh đổi:**
+- Tăng số lượng package so với mô hình MVC truyền thống.
+- Cần chú ý khi các DTO ở các domain khác nhau có tên giống nhau (phải import đúng package).
+
+---
+
 ## Phụ lục A — Sơ Đồ Kiến Trúc Tổng Thể
 
 > Diagram tham chiếu nhanh về các thành phần hệ thống và cách chúng kết nối.
@@ -264,3 +299,20 @@ Với **Virtual Threads (Project Loom)**:
 - Bật bằng `spring.threads.virtual.enabled=true` — Spring Boot tự cấu hình toàn bộ thread pool.
 - MDC (Mapped Diagnostic Context) cho logging hoạt động bình thường với Spring Boot 3.2+ khi Virtual Threads được bật.
 - Tránh dùng `synchronized` block bọc I/O — có thể gây "pinning" (Virtual Thread bị pin vào Carrier Thread, mất lợi ích).
+
+---
+
+## Phụ lục D — Danh Sách API Routes Hiện Có
+
+Bảng dưới đây liệt kê các RESTful API endpoints đã định hình ở tầng Controller (chưa tính đến việc đã implement logic hay chưa):
+
+| Domain | Route | Method | Payload DTO | Response DTO | Tình Trạng |
+|---|---|---|---|---|---|
+| Catalog | `/api/catalog` | `GET` | N/A | `CatalogListResponse` | Stubbed |
+| Catalog | `/api/catalog/{id}` | `GET` | `id` (path var) | `CatalogItemResponse` | Stubbed |
+| Order | `/api/orders` | `POST` | `CreateOrderRequest` | `OrderResponse` | Stubbed |
+| Order | `/api/orders` | `GET` | N/A | `List<OrderResponse>` | Stubbed |
+| Wallet | `/api/wallet` | `GET` | N/A | `WalletBalanceResponse` | Stubbed |
+| Supplier| `/api/admin/suppliers` | `GET` | N/A | `List<SupplierResponse>` | Stubbed |
+
+*(Tất cả response đều được bọc trong `ApiResponse<T>` theo ADR-007)*

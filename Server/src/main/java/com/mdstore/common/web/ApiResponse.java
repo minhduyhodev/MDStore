@@ -1,4 +1,4 @@
-package com.mdstore.common;
+package com.mdstore.common.web;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

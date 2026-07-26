@@ -15,23 +15,21 @@ Hệ thống Dropshipping tài khoản số tự động — mua từ nhà cung 
 
 ### 1. Thiết Lập Biến Môi Trường
 
-Copy file `.env.example` thành `.env` tại thư mục gốc:
+Copy file `.env.example` thành `.env` rồi điền giá trị thật vào:
 
-```env
-# Database
-POSTGRES_DB=mdstore
-POSTGRES_USER=admin
-POSTGRES_PASSWORD=secret
-
-# Redis
-REDIS_HOST=localhost
-REDIS_PORT=6379
-
-# VietShare API
-VIETSHARE_API_URL=https://token.vietshare.site/v1
-VIETSHARE_API_KEY=your_api_key_here
-VIETSHARE_API_SECRET=your_secret_key_here
+```bash
+cp .env.example .env
+# Mở .env bằng editor và điền giá trị thật cho từng biến
 ```
+
+> ⚠️ **Không dùng giá trị mẫu trong tài liệu này cho môi trường thật.**  
+> File `.env` đã được `.gitignore` — **không commit file này lên git**.  
+> Chỉ file `.env.example` (không chứa giá trị thật) mới được commit.
+
+Các biến cần điền (xem đầy đủ trong [`.env.example`](./.env.example)):
+- `POSTGRES_USER` / `POSTGRES_PASSWORD` — credential PostgreSQL
+- `VIETSHARE_API_KEY` / `VIETSHARE_API_SECRET` — lấy từ dashboard VietShare
+
 
 ### 2. Khởi Động Infrastructure (DB + Redis)
 
@@ -49,7 +47,7 @@ cd mdstore-backend
 
 **Frontend:**
 ```bash
-cd mdstore-frontend
+cd client
 npm install
 npm run dev
 ```

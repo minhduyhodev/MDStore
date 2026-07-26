@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,7 +39,8 @@ class VietShareConnectorFetchCatalogTest {
                 5, 10
         );
         VietShareSigner signer = new VietShareSigner(props);
-        connector = new VietShareConnector(props, signer);
+        ObjectMapper objectMapper = new ObjectMapper();
+        connector = new VietShareConnector(props, signer, objectMapper);
     }
 
     @AfterEach
