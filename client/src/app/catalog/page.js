@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import { motion } from 'framer-motion';
 import { Search, Filter, ShoppingCart, Tag, CheckCircle2, XCircle } from 'lucide-react';
+import { useStore } from '@/store/useStore';
+import { toast } from 'sonner';
 
 const MOCK_PRODUCTS = [
   { id: 'p1', name: 'Netflix 1 tháng',  category: 'Streaming', price: 85000,  isActive: true,  image: 'https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=500&q=80' },
@@ -31,6 +33,21 @@ export default function CatalogPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  const { walletBalance, decreaseBalance } = useStore();
+
+  const handlePurchase = (product) => {
+    if (walletBalance >= product.price) {
+      decreaseBalance(product.price);
+      toast.success(`Mua thành công ${product.name}`, {
+        description: `Đã trừ ${product.price.toLocaleString('vi-VN')}₫ từ ví.`,
+      });
+    } else {
+      toast.error(`Thất bại`, {
+        description: `Số dư ví không đủ để mua ${product.name}.`,
+      });
+    }
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -135,6 +152,7 @@ export default function CatalogPage() {
                       </div>
                       <button 
                         disabled={!product.isActive}
+                        onClick={() => handlePurchase(product)}
                         className={`
                           flex items-center justify-center p-3 rounded-xl transition-all
                           ${product.isActive 

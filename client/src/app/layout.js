@@ -4,6 +4,7 @@
 import { Inter } from 'next/font/google';
 import './globals.css';
 import Sidebar from '@/components/Sidebar';
+import { Toaster } from 'sonner';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
@@ -16,6 +17,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="vi" className={inter.variable} suppressHydrationWarning>
       <body className="antialiased min-h-screen selection:bg-indigo-500/30" suppressHydrationWarning>
+        <Toaster position="bottom-right" richColors />
         {/* Layout 2 cột: Sidebar cố định trái + nội dung trang phải */}
         <div className="flex min-h-screen">
           <Sidebar />
