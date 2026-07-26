@@ -187,3 +187,41 @@ Chi tiết envelope: xem [02-decisions.md — ADR-007](./02-decisions.md).
 > Next.js mặc định KHÔNG expose biến môi trường ra browser (vì security).
 > Chỉ biến có `NEXT_PUBLIC_` mới được gửi về browser.
 > Biến không có prefix chỉ dùng được ở Server Component / API routes.
+
+---
+
+## Design System & UI/UX Guidelines
+
+> Các nguyên tắc thiết kế cốt lõi áp dụng cho toàn bộ dự án MDStore Admin Dashboard, đảm bảo tính nhất quán, chuyên nghiệp và tránh cảm giác "AI tạo mặc định".
+
+### 1. Typography (Cặp font chữ)
+- **Heading Font:** `Outfit` (Có cá tính, nét chữ hiện đại, rõ ràng cho các tiêu đề).
+- **Body/Data Font:** `DM Sans` (Dễ đọc ở kích thước nhỏ, tối ưu cho bảng dữ liệu và số liệu).
+- **Nguyên tắc phân cấp:** Tiêu đề phải khác biệt rõ ràng so với nội dung bằng cả `font-family` và `font-weight`.
+
+### 2. Bảng màu (Color Palette)
+- **Màu chủ đạo (Accent Color):** Xanh lá đậm - Emerald (`#059669` / `emerald-600`). Chỉ dùng cho nút bấm chính (Primary Button), trạng thái Active, hoặc badge thành công.
+- **Màu nền và văn bản (Grayscale):** Sử dụng thang màu `slate` (`slate-50` đến `slate-900`) thay vì màu đen/trắng thuần. Không lạm dụng nhiều màu sắc rực rỡ, không dùng gradient AI (`purple` -> `blue`).
+- **Màu trạng thái (Status):**
+  - Warning: `amber-500`
+  - Error/Destructive: `rose-600`
+  - Info: `sky-500`
+
+### 3. Layout & Density
+- **Mật độ cao (High Density):** Giao diện quản lý dữ liệu cần hiển thị nhiều thông tin nhất có thể trên một màn hình mà không bị rối. Padding vừa phải (`p-3`, `p-4`), dùng `text-sm` cho các bảng biểu.
+- **Cấu trúc chung:** Sidebar cố định bên trái (gọn gàng, chỉ có Lucide Icon + Text, không trang trí rườm rà) + Header mỏng (chứa title & actions) + Content Area.
+- **Tránh rập khuôn:** Không lạm dụng bố cục "3 cột card với icon tròn ở giữa". Tùy biến layout dựa trên nghiệp vụ cụ thể của trang.
+
+### 4. Components
+- **Bảng dữ liệu (Tables):** Thành phần cốt lõi của Dashboard.
+  - Phải có nền xen kẽ (Zebra stripes: `even:bg-slate-50`).
+  - Trạng thái hover dòng rõ ràng (`hover:bg-slate-100`).
+  - Cột chứa số/tiền tệ luôn **căn phải**.
+  - Trạng thái (Status) dùng badge màu nhỏ gọn (ví dụ: `px-2 py-0.5 rounded-md text-xs font-medium`), không dùng nút to.
+- **Bo góc (Border Radius):**
+  - Dùng bo góc có chủ đích. Card/Modal/Input dùng `rounded-md` hoặc `rounded-lg`.
+  - Không lạm dụng `rounded-xl` hay `rounded-2xl` ở mọi nơi.
+- **Đổ bóng (Shadow):**
+  - Hạn chế shadow mờ ảo (`drop-shadow-lg`).
+  - Ưu tiên dùng đường viền (`border border-slate-200`) để phân cách không gian. Chỉ dùng shadow tinh tế (`shadow-sm`) để tạo hiệu ứng nổi nhẹ khi cần thiết (VD: Dropdown, Modal).
+- **Icons:** Sử dụng thư viện `lucide-react`. Tuyệt đối không dùng Emoji trong UI.

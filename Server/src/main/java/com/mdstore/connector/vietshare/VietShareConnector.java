@@ -23,6 +23,10 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 /**
@@ -39,12 +43,10 @@ public class VietShareConnector implements SupplierConnector {
 
     private final RestClient restClient;
     private final VietShareSigner signer;
-    private final String apiUrl;
     private final ObjectMapper objectMapper;
 
     public VietShareConnector(VietShareProperties props, VietShareSigner signer, ObjectMapper objectMapper) {
-        this.signer  = signer;
-        this.apiUrl  = props.apiUrl();
+        this.signer = signer;
         this.objectMapper = objectMapper;
 
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
@@ -203,12 +205,13 @@ public class VietShareConnector implements SupplierConnector {
         String body = e.getResponseBodyAsString();
         log.warn("VietShare client error during {}: {} — {}", operation, status, body);
 
+        Duration retryAfter = parseRetryAfter(e);
         throw switch (status) {
             case UNAUTHORIZED -> new SupplierException(ErrorCode.UNAUTHORIZED,
                     "VietShare authentication failed — check API key/secret", e);
             case TOO_MANY_REQUESTS -> new SupplierException(ErrorCode.RATE_LIMITED,
-                    "VietShare rate limit exceeded", e);
-            case CONFLICT -> parseConflictError(body, e);
+                    "VietShare rate limit exceeded", e, retryAfter);
+            case CONFLICT -> parseConflictError(body, e, retryAfter);
             default -> new SupplierException(ErrorCode.INVALID_REQUEST,
                     "VietShare rejected request: " + body, e);
         };
@@ -218,7 +221,8 @@ public class VietShareConnector implements SupplierConnector {
      * HTTP 409 có thể là PRICE_CHANGED hoặc OUT_OF_STOCK — phân biệt qua body.
      * Xem docs/04-suppliers/vietshare.md — Bảng Mã Lỗi.
      */
-    private SupplierException parseConflictError(String body, HttpClientErrorException cause) {
+    private SupplierException parseConflictError(String body, HttpClientErrorException cause,
+                                                   Duration retryAfter) {
         if (body.contains("PRICE_CHANGED")) {
             return new SupplierException(ErrorCode.PRICE_CHANGED,
                     "Supplier price changed, user must confirm new price", cause);
@@ -229,9 +233,34 @@ public class VietShareConnector implements SupplierConnector {
         }
         if (body.contains("REQUEST_IN_PROGRESS")) {
             return new SupplierException(ErrorCode.REQUEST_IN_PROGRESS,
-                    "Request is already being processed, please wait and retry", cause);
+                    "Request is already being processed, please wait and retry", cause, retryAfter);
         }
         return new SupplierException(ErrorCode.INVALID_REQUEST,
-                "Supplier conflict (409): " + body, cause);
+                "Supplier returned an unrecognized conflict", cause);
+    }
+
+    private Duration parseRetryAfter(HttpClientErrorException exception) {
+        if (exception.getResponseHeaders() == null) {
+            return null;
+        }
+        String value = exception.getResponseHeaders().getFirst("Retry-After");
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+
+        try {
+            long seconds = Long.parseLong(value.trim());
+            return seconds < 0 ? null : Duration.ofSeconds(seconds);
+        } catch (NumberFormatException ignored) {
+            try {
+                Instant retryAt = ZonedDateTime.parse(value.trim(), DateTimeFormatter.RFC_1123_DATE_TIME)
+                        .toInstant();
+                Duration delay = Duration.between(Instant.now(), retryAt);
+                return delay.isNegative() ? null : delay;
+            } catch (DateTimeParseException invalidHeader) {
+                log.warn("VietShare returned invalid Retry-After header");
+                return null;
+            }
+        }
     }
 }

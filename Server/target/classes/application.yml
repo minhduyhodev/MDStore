@@ -35,6 +35,16 @@ vietshare:
   connect-timeout-seconds: 5
   read-timeout-seconds: 10
 
+mdstore:
+  orders:
+    retry:
+      enabled: true
+      poll-delay: 1s
+      batch-size: 50
+      lease-duration: 60s
+      retry-after-cap: 60s
+      delays: [5s, 15s, 30s]
+
 logging:
   level:
     com.mdstore: DEBUG

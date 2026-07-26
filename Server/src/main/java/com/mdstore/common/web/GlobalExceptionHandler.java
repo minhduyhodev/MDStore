@@ -23,9 +23,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ApiResponse<Void>> handleApiException(ApiException ex) {
         log.warn("API Exception: {} - {}", ex.getErrorCode(), ex.getMessage());
-        HttpStatus status = ex.getErrorCode() == ErrorCode.ORDER_PRICE_CHANGED
-                ? HttpStatus.CONFLICT
-                : HttpStatus.BAD_REQUEST;
+        HttpStatus status = switch (ex.getErrorCode()) {
+            case ORDER_PRICE_CHANGED, ORDER_OUT_OF_STOCK -> HttpStatus.CONFLICT;
+            case SUPPLIER_ERROR, INTERNAL_SERVER_ERROR -> HttpStatus.BAD_GATEWAY;
+            default -> HttpStatus.BAD_REQUEST;
+        };
         ApiResponse<Void> response = ApiResponse.error(ex.getErrorCode().name(), ex.getMessage());
         return ResponseEntity.status(status).body(response);
     }

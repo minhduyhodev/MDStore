@@ -7,8 +7,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
@@ -112,16 +110,11 @@ public class OrderEntity {
         this.flashSaleId = flashSaleId;
     }
 
-    @PrePersist
-    void prePersist() {
-        Instant now = Instant.now();
-        createdAt = now;
+    public void touch(Instant now) {
+        if (createdAt == null) {
+            createdAt = now;
+        }
         updatedAt = now;
-    }
-
-    @PreUpdate
-    void preUpdate() {
-        updatedAt = Instant.now();
     }
 
     public void markProcessingRetry(int retryAttempt, Instant nextRetryAt,

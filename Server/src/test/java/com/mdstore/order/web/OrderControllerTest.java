@@ -6,11 +6,14 @@ import com.mdstore.common.web.GlobalExceptionHandler;
 import com.mdstore.order.service.OrderOrchestrationService;
 import com.mdstore.order.service.OrderPriceChangedException;
 import com.mdstore.order.web.dto.CreateOrderRequest;
+import com.mdstore.order.web.dto.OrderResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+
+import java.math.BigDecimal;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -32,6 +35,37 @@ class OrderControllerTest {
 
     @MockBean
     private OrderOrchestrationService orderOrchestrationService;
+
+    @Test
+    void createOrder_whenRetryScheduled_returnsAcceptedEnvelope() throws Exception {
+        CreateOrderRequest request = new CreateOrderRequest("42", 1, null);
+        when(orderOrchestrationService.placeOrder(any(CreateOrderRequest.class)))
+                .thenReturn(new OrderResponse("MDO-1", "42", 1, new BigDecimal("80"),
+                        "PROCESSING_RETRY", null));
+
+        mockMvc.perform(post("/api/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.orderId").value("MDO-1"))
+                .andExpect(jsonPath("$.data.status").value("PROCESSING_RETRY"))
+                .andExpect(jsonPath("$.data.deliveredAccounts").doesNotExist());
+    }
+
+    @Test
+    void createOrder_whenCompleted_returnsOkEnvelope() throws Exception {
+        CreateOrderRequest request = new CreateOrderRequest("42", 1, null);
+        when(orderOrchestrationService.placeOrder(any(CreateOrderRequest.class)))
+                .thenReturn(new OrderResponse("MDO-1", "42", 1, new BigDecimal("80"),
+                        "COMPLETED", java.util.List.of("account")));
+
+        mockMvc.perform(post("/api/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("COMPLETED"));
+    }
 
     @Test
     void createOrder_invalidRequest_returnsBadRequestWithEnvelope() throws Exception {

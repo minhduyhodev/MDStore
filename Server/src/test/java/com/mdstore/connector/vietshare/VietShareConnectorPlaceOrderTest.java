@@ -126,9 +126,11 @@ class VietShareConnectorPlaceOrderTest {
     }
 
     @Test
-    void placeOrder_http429_throwsRateLimited_isRetryable() {
+    void placeOrder_http429_throwsRateLimitedWithRetryAfter() {
         wireMock.stubFor(post(urlEqualTo("/v1/orders"))
-                .willReturn(aResponse().withStatus(429).withBody("TOO_MANY_REQUESTS")));
+                .willReturn(aResponse().withStatus(429)
+                        .withHeader("Retry-After", "20")
+                        .withBody("TOO_MANY_REQUESTS")));
 
         OrderRequest request = new OrderRequest("VS_NORDVPN_1M", 1, new BigDecimal("15000.00"), UUID.randomUUID().toString(), null, null);
 
@@ -138,6 +140,26 @@ class VietShareConnectorPlaceOrderTest {
                     SupplierException se = (SupplierException) e;
                     assertThat(se.getErrorCode()).isEqualTo(SupplierException.ErrorCode.RATE_LIMITED);
                     assertThat(se.isRetryable()).isTrue();
+                    assertThat(se.getRetryAfter()).contains(java.time.Duration.ofSeconds(20));
+                });
+    }
+
+    @Test
+    void placeOrder_requestInProgress_isRetryableWithRetryAfter() {
+        wireMock.stubFor(post(urlEqualTo("/v1/orders"))
+                .willReturn(aResponse().withStatus(409)
+                        .withHeader("Retry-After", "12")
+                        .withBody("REQUEST_IN_PROGRESS")));
+
+        OrderRequest request = new OrderRequest("VS_NORDVPN_1M", 1, new BigDecimal("15000.00"), UUID.randomUUID().toString(), null, null);
+
+        assertThatThrownBy(() -> connector.placeOrder(request))
+                .isInstanceOf(SupplierException.class)
+                .satisfies(e -> {
+                    SupplierException se = (SupplierException) e;
+                    assertThat(se.getErrorCode()).isEqualTo(SupplierException.ErrorCode.REQUEST_IN_PROGRESS);
+                    assertThat(se.isRetryable()).isTrue();
+                    assertThat(se.getRetryAfter()).contains(java.time.Duration.ofSeconds(12));
                 });
     }
 

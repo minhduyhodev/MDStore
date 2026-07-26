@@ -1,5 +1,6 @@
 package com.mdstore.common.web;
 
+import com.mdstore.order.service.OrderOutOfStockException;
 import com.mdstore.order.service.OrderPriceChangedException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,27 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getBody().error().code()).isEqualTo("ORDER_PRICE_CHANGED");
         assertThat(response.getBody().error().message())
                 .isEqualTo("Giá sản phẩm đã thay đổi, vui lòng xác nhận lại");
+    }
+
+    @Test
+    void handleApiException_whenOrderOutOfStock_returnsConflictEnvelope() {
+        ResponseEntity<ApiResponse<Void>> response = handler.handleApiException(
+                new OrderOutOfStockException());
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().error().code()).isEqualTo("ORDER_OUT_OF_STOCK");
+    }
+
+    @Test
+    void handleApiException_whenSupplierFails_returnsBadGatewayWithoutSupplierDetails() {
+        ResponseEntity<ApiResponse<Void>> response = handler.handleApiException(
+                new ApiException(ErrorCode.SUPPLIER_ERROR));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_GATEWAY);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().error().message())
+                .isEqualTo(ErrorCode.SUPPLIER_ERROR.getDefaultMessage());
     }
 
     @Test

@@ -1,39 +1,50 @@
 package com.mdstore.connector;
 
+import java.time.Duration;
+import java.util.Optional;
+
 /**
- * Exception ném ra khi supplier trả lỗi có nghĩa business (không phải lỗi network tạm thời).
+ * Exception ném ra khi supplier trả lỗi có nghĩa business hoặc lỗi tạm thời đã được phân loại.
  * OrderOrchestrationService bắt exception này để quyết định hành động tiếp theo.
  */
 public class SupplierException extends RuntimeException {
 
     public enum ErrorCode {
-        PRICE_CHANGED,      // HTTP 409 — giá thay đổi, cần user confirm
-        OUT_OF_STOCK,       // HTTP 409 — hết hàng
-        REQUEST_IN_PROGRESS,// HTTP 409 — request đang xử lý → retry với Idempotency-Key
-        UNAUTHORIZED,       // HTTP 401 — sai API key/signature → alert admin
-        INVALID_REQUEST,    // HTTP 400 — lỗi payload → alert dev
-        RATE_LIMITED,       // HTTP 429 → retry với backoff (ADR-006)
-        SERVER_ERROR,       // HTTP 5xx → retry với backoff (ADR-006)
-        NETWORK_TIMEOUT,    // network timeout → retry với backoff + giữ idempotency key
+        PRICE_CHANGED,
+        OUT_OF_STOCK,
+        REQUEST_IN_PROGRESS,
+        UNAUTHORIZED,
+        INVALID_REQUEST,
+        RATE_LIMITED,
+        SERVER_ERROR,
+        NETWORK_TIMEOUT,
     }
 
     private final ErrorCode errorCode;
+    private final Duration retryAfter;
 
     public SupplierException(ErrorCode errorCode, String message) {
-        super(message);
-        this.errorCode = errorCode;
+        this(errorCode, message, null, null);
     }
 
     public SupplierException(ErrorCode errorCode, String message, Throwable cause) {
+        this(errorCode, message, cause, null);
+    }
+
+    public SupplierException(ErrorCode errorCode, String message, Throwable cause, Duration retryAfter) {
         super(message, cause);
         this.errorCode = errorCode;
+        this.retryAfter = retryAfter;
     }
 
     public ErrorCode getErrorCode() {
         return errorCode;
     }
 
-    /** Trả về true nếu lỗi này nên được retry (theo ADR-006) */
+    public Optional<Duration> getRetryAfter() {
+        return Optional.ofNullable(retryAfter);
+    }
+
     public boolean isRetryable() {
         return switch (errorCode) {
             case RATE_LIMITED, SERVER_ERROR, NETWORK_TIMEOUT, REQUEST_IN_PROGRESS -> true;
