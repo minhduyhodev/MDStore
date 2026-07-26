@@ -36,13 +36,16 @@ class OrderRetryWorkerTest {
         OrderAttempt attempt = new OrderAttempt(
                 1L, "MDO-1", "42", 1, new BigDecimal("80"), "VIETSHARE",
                 "EXT", new BigDecimal("80"), "stable-key", null, null, 1, "claim");
-        when(persistenceService.claimDueRetries(now)).thenReturn(List.of(attempt));
+        OrderClaim claim = new OrderClaim(1L, "MDO-1", "claim");
+        when(persistenceService.claimDueRetries(now)).thenReturn(List.of(claim));
+        when(persistenceService.loadClaimedAttempt(claim)).thenReturn(attempt);
 
         worker.processDueRetries();
 
         InOrder order = inOrder(persistenceService, attemptService);
         order.verify(persistenceService).recoverExpiredLeases(now);
         order.verify(persistenceService).claimDueRetries(now);
+        order.verify(persistenceService).loadClaimedAttempt(claim);
         order.verify(attemptService).executeRetry(attempt);
     }
 }

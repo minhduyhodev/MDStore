@@ -1,9 +1,13 @@
 F:\personal-project\MDStore\Server\src\test\java\com\mdstore\connector\ConnectorRegistryTest.java
+F:\personal-project\MDStore\Server\src\test\java\com\mdstore\order\service\OrderRetryPolicyTest.java
 F:\personal-project\MDStore\Server\src\test\java\com\mdstore\catalog\service\CatalogSyncServiceTest.java
 F:\personal-project\MDStore\Server\src\test\java\com\mdstore\catalog\web\CatalogControllerTest.java
 F:\personal-project\MDStore\Server\src\test\java\com\mdstore\order\service\OrderOrchestrationServiceTest.java
-F:\personal-project\MDStore\Server\src\test\java\com\mdstore\connector\vietshare\VietShareSignerTest.java
-F:\personal-project\MDStore\Server\src\test\java\com\mdstore\order\web\OrderControllerTest.java
 F:\personal-project\MDStore\Server\src\test\java\com\mdstore\common\web\GlobalExceptionHandlerTest.java
 F:\personal-project\MDStore\Server\src\test\java\com\mdstore\connector\vietshare\VietShareConnectorFetchCatalogTest.java
+F:\personal-project\MDStore\Server\src\test\java\com\mdstore\order\service\OrderAttemptServiceTest.java
+F:\personal-project\MDStore\Server\src\test\java\com\mdstore\connector\vietshare\VietShareSignerTest.java
+F:\personal-project\MDStore\Server\src\test\java\com\mdstore\order\service\OrderPersistenceServiceTest.java
+F:\personal-project\MDStore\Server\src\test\java\com\mdstore\order\service\OrderRetryWorkerTest.java
+F:\personal-project\MDStore\Server\src\test\java\com\mdstore\order\web\OrderControllerTest.java
 F:\personal-project\MDStore\Server\src\test\java\com\mdstore\connector\vietshare\VietShareConnectorPlaceOrderTest.java

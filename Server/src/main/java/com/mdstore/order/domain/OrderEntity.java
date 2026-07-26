@@ -46,10 +46,10 @@ public class OrderEntity {
     @Column(name = "supplier_code", nullable = false)
     private String supplierCode;
 
-    @Column(name = "supplier_external_code", nullable = false)
+    @Column(name = "supplier_external_code")
     private String supplierExternalCode;
 
-    @Column(name = "max_unit_price", nullable = false)
+    @Column(name = "max_unit_price")
     private BigDecimal maxUnitPrice;
 
     @Column(name = "coupon_code")

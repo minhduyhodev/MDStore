@@ -155,8 +155,8 @@ CREATE TABLE orders (
     status                 VARCHAR(50)    NOT NULL,
     idempotency_key        VARCHAR(255)   NOT NULL UNIQUE,
     supplier_code          VARCHAR(50)    NOT NULL,
-    supplier_external_code VARCHAR(100)   NOT NULL,
-    max_unit_price         NUMERIC(15, 2) NOT NULL,
+    supplier_external_code VARCHAR(100), -- nullable khi rollout; order mới bắt buộc có snapshot
+    max_unit_price         NUMERIC(15, 2), -- nullable khi rollout; order mới bắt buộc có snapshot
     coupon_code            VARCHAR(255),
     flash_sale_id          VARCHAR(255),
     retry_attempt          INTEGER        NOT NULL DEFAULT 0,

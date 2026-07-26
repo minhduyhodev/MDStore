@@ -203,7 +203,7 @@ public class VietShareConnector implements SupplierConnector {
     private <T> T handleClientError(HttpClientErrorException e, String operation) {
         HttpStatus status = HttpStatus.valueOf(e.getStatusCode().value());
         String body = e.getResponseBodyAsString();
-        log.warn("VietShare client error during {}: {} — {}", operation, status, body);
+        log.warn("VietShare client error during {}: {}", operation, status);
 
         Duration retryAfter = parseRetryAfter(e);
         throw switch (status) {

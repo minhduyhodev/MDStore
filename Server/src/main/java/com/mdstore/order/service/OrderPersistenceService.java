@@ -42,10 +42,11 @@ public class OrderPersistenceService {
     @Transactional
     public void complete(OrderAttempt attempt, OrderResult result) {
         OrderEntity order = loadCurrentAttempt(attempt);
+        Instant completedAt = clock.instant();
         order.markCompleted(result.supplierOrderId());
-        order.touch(clock.instant());
+        order.touch(completedAt);
         deliveredAccountRepository.saveAll(result.accountData().stream()
-                .map(account -> new DeliveredAccountEntity(order.getId(), account))
+                .map(account -> new DeliveredAccountEntity(order.getId(), account, completedAt))
                 .toList());
     }
 
@@ -60,29 +61,50 @@ public class OrderPersistenceService {
     @Transactional
     public void fail(OrderAttempt attempt, OrderStatus failedStatus,
                      String errorCode, String errorMessage) {
-        loadCurrentAttempt(attempt).markFailed(failedStatus, errorCode, errorMessage);
+        OrderEntity order = loadCurrentAttempt(attempt);
+        order.markFailed(failedStatus, errorCode, errorMessage);
+        order.touch(clock.instant());
     }
 
     @Transactional
-    public List<OrderAttempt> claimDueRetries(Instant now) {
+    public List<OrderClaim> claimDueRetries(Instant now) {
         return orderRepository.findDueForRetry(now, retryProperties.batchSize())
                 .stream()
-                .map(order -> claim(order, now))
+                .map(order -> toClaim(claim(order, now)))
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public OrderAttempt loadClaimedAttempt(OrderClaim claim) {
+        OrderEntity order = orderRepository.findById(claim.orderId())
+                .orElseThrow(() -> new IllegalStateException("Order not found: " + claim.orderNo()));
+        if (order.getStatus() != OrderStatus.RETRYING
+                || !claim.claimToken().equals(order.getRetryClaimToken())) {
+            throw new StaleOrderAttemptException(claim.orderNo());
+        }
+        return toAttempt(order, claim.claimToken());
     }
 
     @Transactional
     public int recoverExpiredLeases(Instant now) {
         List<OrderEntity> expired = orderRepository.findExpiredLeases(
                 now, retryProperties.batchSize());
-        expired.forEach(order -> order.recoverExpiredLease(now));
+        expired.forEach(order -> {
+            order.recoverExpiredLease(now);
+            order.touch(now);
+        });
         return expired.size();
     }
 
     private OrderAttempt claim(OrderEntity order, Instant now) {
         String claimToken = UUID.randomUUID().toString();
         order.claimRetry(claimToken, now.plus(retryProperties.leaseDuration()));
+        order.touch(now);
         return toAttempt(order, claimToken);
+    }
+
+    private OrderClaim toClaim(OrderAttempt attempt) {
+        return new OrderClaim(attempt.orderId(), attempt.orderNo(), attempt.claimToken());
     }
 
     private OrderEntity loadCurrentAttempt(OrderAttempt attempt) {

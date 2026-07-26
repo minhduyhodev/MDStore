@@ -56,34 +56,32 @@
 
 ---
 
-### Task: [S] Trang Chi tiết Đơn hàng (orders/[id])
+### Task: [M] Trang Quản lý Supplier Admin (admin/suppliers)
 
 **Trạng thái**: Plan — bước 1/6
 
 **1. Plan (phân tích + lên kế hoạch)**
-- [ ] Đọc các file liên quan: `docs/09-frontend.md`, `docs/05-business-flows.md`, `src/app/orders/page.js`
-- [ ] Xác định phạm vi: Tạo folder `src/app/orders/[id]` và file `page.js`. Cần giao diện hiển thị chi tiết (trạng thái, ngày đặt), chi tiết sản phẩm, danh sách account trả về (`delivered_accounts`), và form xác nhận giá mới nếu bị lỗi `PRICE_CHANGED`.
-- [ ] Chia nhỏ task: 1. Setup layout trang tĩnh. 2. Fetch mock data và render thông tin đơn. 3. Thêm vùng hiển thị account và vùng xử lý lỗi đổi giá.
+- [ ] Đọc các file liên quan: `docs/09-frontend.md`, stub API (nếu cần), Backlog Backend.
+- [ ] Xác định phạm vi: Tạo trang hiển thị danh sách nguồn cung cấp (VietShare, v.v.), trạng thái, số dư hiện tại.
+- [ ] Chia nhỏ task: 1. Setup layout. 2. Fetch mock data & render bảng.
 
 **2. Code**
-- [ ] Bước 2.1: Tạo file và layout cơ bản (Grid/Flex)
-- [ ] Bước 2.2: Render thông tin đơn hàng và badge trạng thái
-- [ ] Bước 2.3: Render `delivered_accounts` (nếu có) và form báo giá mới (nếu `FAILED_PRICE_CHANGED`)
+- [ ] Bước 2.1: ...
+- [ ] Bước 2.2: ...
 
 **3. Test**
-- [ ] Kiểm tra responsive và test các luồng hiển thị trạng thái khác nhau (COMPLETED, PENDING, FAILED_PRICE_CHANGED).
+- [ ] Test layout responsive
 
 **4. Self-review (agent tự soát trước khi báo cáo)**
-- [ ] Đảm bảo đúng chuẩn Design System (màu Emerald, font Outfit/DM Sans, border-slate-200, không drop-shadow-lg lạm dụng).
-- [ ] Code React gọn gàng, dùng Lucide icons.
+- [ ] Kiểm tra tuân thủ Design System (DM Sans, Outfit, Emerald color).
 
 **5. Cập nhật tài liệu (nếu có ảnh hưởng)**
-- [ ] Cập nhật thêm vào PROGRESS.md khi hoàn thành.
+- [ ] Cập nhật PROGRESS.md khi hoàn thành.
 
 **6. Done — chỉ tick khi 1-5 đã xong hết**
 - [ ] Di chuyển task xuống mục "Done".
 
-**Bước tiếp theo cụ thể**: Trình bày hướng thiết kế (2-3 câu) cho user duyệt. Chờ duyệt rồi bắt tay vào Bước 2 (Code).
+**Bước tiếp theo cụ thể**: Chuẩn bị mockup/thiết kế và chờ user duyệt trước khi code.
 
 ---
 
@@ -94,7 +92,7 @@
 > - `[M]` = cần vài vòng Plan→Test lặp lại
 > - `[L]` = quá to, **PHẢI tách nhỏ hơn nữa trước khi bắt đầu**, không được giữ nguyên
 
-- [ ] [M] Viết OrderOrchestrationService: retry/backoff (Exponential Backoff, giữ Idempotency-Key)
+- [ ] [M] Viết OrderOrchestrationService: retry/backoff — code/docs/test đã viết; còn chạy full suite + self-review cuối (không dùng Flyway migration theo quyết định owner)
 - [ ] [S] L.1: Confirm schema `supplier_products` (đã xong một phần, cần review thêm field)
 - [ ] [M] L.2: Thiết kế schema `orders` ✅ (Đã hoàn thành cơ bản qua Routing Logic)
 - [ ] [S] WalletService: Đọc balance qua GET /v1/account từ VietShare (Task mới bổ sung)
@@ -108,7 +106,7 @@
 
 ## Backlog Frontend (chưa làm, thứ tự ưu tiên từ trên xuống)
 
-- [ ] [S] Trang Chi tiết Đơn hàng (`orders/[id]`) — core flow, hiển thị thông tin tài khoản và xử lý PRICE_CHANGED.
+- [x] [S] Trang Chi tiết Đơn hàng (`orders/[id]`) — core flow, hiển thị thông tin tài khoản và xử lý PRICE_CHANGED.
 - [ ] [M] Trang Quản lý Supplier Admin (`admin/suppliers`) — quản lý nguồn cung cấp.
 - [ ] [M] Trang Chi tiết Sản phẩm (`catalog/[id]`) — không gấp, làm sau.
 
@@ -120,6 +118,8 @@
 ---
 
 ## Done (chỉ 1 dòng/task, chi tiết xem git log)
+
+- [x] 2026-07-26 — Thiết kế UI Trang Chi tiết Đơn hàng (orders/[id]) với layout 2 cột, logic hiển thị account và Form xử lý giá đổi (PRICE_CHANGED) theo đúng Design System. Cập nhật routing trong orders list.
 
 - [x] 2026-07-26 — Hoàn thiện PRICE_CHANGED flow: lưu `FAILED_PRICE_CHANGED`, trả error envelope `ORDER_PRICE_CHANGED` với HTTP 409, kết nối POST order vào orchestration service; toàn bộ 36/36 test pass.
 - [x] 2026-07-26 — Dọn dẹp + sửa lỗi header tài liệu (xem báo cáo đầy đủ bên dưới)

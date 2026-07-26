@@ -45,8 +45,8 @@ public class OrderAttemptService {
     }
 
     private AttemptOutcome execute(OrderAttempt attempt) {
-        SupplierConnector connector = connectorRegistry.getConnector(attempt.supplierCode());
         try {
+            SupplierConnector connector = connectorRegistry.getConnector(attempt.supplierCode());
             OrderResult result = connector.placeOrder(attempt.toSupplierRequest());
             persistenceService.complete(attempt, result);
             log.info("Order {} completed with supplier order {}",

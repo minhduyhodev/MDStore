@@ -25,7 +25,8 @@ public class GlobalExceptionHandler {
         log.warn("API Exception: {} - {}", ex.getErrorCode(), ex.getMessage());
         HttpStatus status = switch (ex.getErrorCode()) {
             case ORDER_PRICE_CHANGED, ORDER_OUT_OF_STOCK -> HttpStatus.CONFLICT;
-            case SUPPLIER_ERROR, INTERNAL_SERVER_ERROR -> HttpStatus.BAD_GATEWAY;
+            case SUPPLIER_ERROR -> HttpStatus.BAD_GATEWAY;
+            case INTERNAL_SERVER_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
             default -> HttpStatus.BAD_REQUEST;
         };
         ApiResponse<Void> response = ApiResponse.error(ex.getErrorCode().name(), ex.getMessage());

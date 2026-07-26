@@ -94,6 +94,33 @@ class VietShareConnectorPlaceOrderTest {
     // ──────────── Error cases ────────────
 
     @Test
+    void placeOrder_repeatedCalls_preserveIdempotencyKey() {
+        String idempotencyKey = "stable-idempotency-key";
+        wireMock.stubFor(post(urlEqualTo("/v1/orders"))
+                .withHeader("Idempotency-Key", equalTo(idempotencyKey))
+                .willReturn(okJson("""
+                        {
+                          "status": "success",
+                          "data": {
+                            "order_id": "VS-1",
+                            "product_code": "VS_NORDVPN_1M",
+                            "unit_price": 15000.00,
+                            "total_price": 15000.00,
+                            "delivered_accounts": []
+                          }
+                        }
+                        """)));
+        OrderRequest request = new OrderRequest("VS_NORDVPN_1M", 1,
+                new BigDecimal("15000.00"), idempotencyKey, null, null);
+
+        connector.placeOrder(request);
+        connector.placeOrder(request);
+
+        wireMock.verify(2, postRequestedFor(urlEqualTo("/v1/orders"))
+                .withHeader("Idempotency-Key", equalTo(idempotencyKey)));
+    }
+
+    @Test
     void placeOrder_http409_priceChanged_throwsPriceChanged() {
         wireMock.stubFor(post(urlEqualTo("/v1/orders"))
                 .willReturn(aResponse().withStatus(409).withBody("PRICE_CHANGED")));

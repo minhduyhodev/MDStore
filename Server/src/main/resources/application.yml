@@ -1,18 +1,18 @@
 spring:
   threads:
     virtual:
-      enabled: true   # ADR-002: Virtual Threads cho I/O-bound calls
+      enabled: true # ADR-002: Virtual Threads cho I/O-bound calls
 
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB:mdstore}  # Bắt buộc — không có fallback cho host/port
-    username: ${POSTGRES_USER}             # Bắt buộc — không có fallback, Spring Boot báo lỗi nếu thiếu
-    password: ${POSTGRES_PASSWORD}          # Bắt buộc — không có fallback
+    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB:mdstore} # Bắt buộc — không có fallback cho host/port
+    username: ${POSTGRES_USER} # Bắt buộc — không có fallback, Spring Boot báo lỗi nếu thiếu
+    password: ${POSTGRES_PASSWORD} # Bắt buộc — không có fallback
     hikari:
       maximum-pool-size: 10
 
   jpa:
     hibernate:
-      ddl-auto: validate   # Flyway quản lý schema, không để Hibernate tự tạo
+      ddl-auto: update # Flyway quản lý schema, không để Hibernate tự tạo
     open-in-view: false
     properties:
       hibernate:
@@ -29,9 +29,9 @@ spring:
 
 # VietShare supplier config — xem docs/04-suppliers/vietshare.md
 vietshare:
-  api-url: ${VIETSHARE_API_URL}                # Bắt buộc — không có fallback
-  api-key: ${VIETSHARE_API_KEY}            # Bắt buộc — không có fallback
-  api-secret: ${VIETSHARE_API_SECRET}      # Bắt buộc — không có fallback
+  api-url: ${VIETSHARE_API_URL} # Bắt buộc — không có fallback
+  api-key: ${VIETSHARE_API_KEY} # Bắt buộc — không có fallback
+  api-secret: ${VIETSHARE_API_SECRET} # Bắt buộc — không có fallback
   connect-timeout-seconds: 5
   read-timeout-seconds: 10
 

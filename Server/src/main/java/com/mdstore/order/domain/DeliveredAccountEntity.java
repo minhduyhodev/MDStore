@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 import java.time.Instant;
@@ -30,14 +29,10 @@ public class DeliveredAccountEntity {
     public DeliveredAccountEntity() {
     }
 
-    public DeliveredAccountEntity(Long orderId, String accountData) {
+    public DeliveredAccountEntity(Long orderId, String accountData, Instant createdAt) {
         this.orderId = orderId;
         this.accountData = accountData;
-    }
-
-    @PrePersist
-    void prePersist() {
-        createdAt = Instant.now();
+        this.createdAt = createdAt;
     }
 
     public Long getId() {

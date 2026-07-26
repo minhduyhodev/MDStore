@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import { motion } from 'framer-motion';
 import { CheckCircle2, Clock, AlertCircle, RefreshCw, Box, Download, Filter } from 'lucide-react';
@@ -26,6 +27,7 @@ const containerVariants = {
 };
 
 export default function OrdersPage() {
+  const router = useRouter();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -109,7 +111,11 @@ export default function OrdersPage() {
                       const StatusIcon = status.icon;
                       
                       return (
-                        <tr key={order.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
+                        <tr 
+                          key={order.id} 
+                          onClick={() => router.push(`/orders/${order.id}`)}
+                          className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group cursor-pointer"
+                        >
                           <td className="py-4 px-6">
                             <span className="font-mono text-xs font-medium text-slate-400 group-hover:text-indigo-500 transition-colors">{order.id}</span>
                           </td>

@@ -33,12 +33,13 @@ public class OrderRetryWorker {
             log.warn("Recovered {} expired order retry leases", recovered);
         }
 
-        List<OrderAttempt> attempts = persistenceService.claimDueRetries(retryPolicy.now());
-        for (OrderAttempt attempt : attempts) {
+        List<OrderClaim> claims = persistenceService.claimDueRetries(retryPolicy.now());
+        for (OrderClaim claim : claims) {
             try {
+                OrderAttempt attempt = persistenceService.loadClaimedAttempt(claim);
                 attemptService.executeRetry(attempt);
             } catch (RuntimeException exception) {
-                log.error("Unexpected retry worker failure for order {}", attempt.orderNo(), exception);
+                log.error("Unexpected retry worker failure for order {}", claim.orderNo(), exception);
             }
         }
     }
