@@ -46,13 +46,12 @@ class VietShareSignerTest {
     }
 
     @Test
-    void sign_timestampIsCurrentMillisFormat() {
+    void sign_timestampIsCurrentEpochSeconds() {
         VietShareSigner.SignedHeaders headers = signer.sign("GET", "/v1/products", null);
 
         long ts = Long.parseLong(headers.xTimestamp());
-        long now = System.currentTimeMillis();
-        // Timestamp phải trong khoảng 5 giây so với now
-        assertThat(ts).isBetween(now - 5000, now + 5000);
+        long now = java.time.Instant.now().getEpochSecond();
+        assertThat(ts).isBetween(now - 5, now + 5);
     }
 
     @Test

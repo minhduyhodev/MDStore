@@ -88,7 +88,7 @@ class VietShareConnectorFetchCatalogTest {
         // Xác nhận đúng 4 header xác thực (tên phải khớp docs/04-suppliers/vietshare.md)
         wireMock.verify(getRequestedFor(urlEqualTo("/v1/products"))
                 .withHeader("X-Shop-API-ID", equalTo("test-api-key"))
-                .withHeader("X-Timestamp", matching("\\d{13}"))   // Unix millis 13 digits
+                .withHeader("X-Timestamp", matching("\\d{10}"))   // Unix seconds
                 .withHeader("X-Nonce", matching("[0-9a-f-]{36}")) // UUID
                 .withHeader("X-Signature", matching("[0-9a-f]{64}")));
     }

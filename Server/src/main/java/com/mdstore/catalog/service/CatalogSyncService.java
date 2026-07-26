@@ -9,6 +9,7 @@ import com.mdstore.connector.SupplierConnector;
 import com.mdstore.connector.SupplierProduct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -96,6 +97,8 @@ public class CatalogSyncService {
             redisTemplate.opsForValue().set(key, json, CACHE_TTL);
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize catalog for Redis caching", e);
+        } catch (DataAccessException e) {
+            log.warn("Redis unavailable; catalog DB sync remains valid for supplier {}", supplierCode);
         }
     }
 }

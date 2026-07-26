@@ -12,6 +12,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
@@ -88,4 +89,29 @@ class CatalogSyncServiceTest {
         // Cached
         verify(valueOperations).set(eq("catalog:VIETSHARE"), eq("[]"), any());
     }
+
+    @Test
+    void syncCatalog_whenRedisUnavailable_keepsDatabaseSyncSuccessful() throws Exception {
+        when(connectorRegistry.getAllConnectors()).thenReturn(List.of(supplierConnector));
+        when(supplierConnector.getSupplierCode()).thenReturn("VIETSHARE");
+
+        SupplierProduct product = new SupplierProduct(
+                "EXT-1", "Product 1", new BigDecimal("100"), true, null);
+        when(supplierConnector.fetchCatalog()).thenReturn(List.of(product));
+
+        SupplierProductEntity existing = new SupplierProductEntity(
+                1L, "VIETSHARE", "EXT-1", new BigDecimal("50"), true, null);
+        when(repository.findBySupplierCodeAndExternalCode("VIETSHARE", "EXT-1"))
+                .thenReturn(Optional.of(existing));
+        when(objectMapper.writeValueAsString(any())).thenReturn("[]");
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        org.mockito.Mockito.doThrow(new RedisConnectionFailureException("Redis offline"))
+                .when(valueOperations).set(eq("catalog:VIETSHARE"), eq("[]"), any());
+
+        catalogSyncService.syncCatalog();
+
+        verify(repository).save(existing);
+        assertThat(existing.getSupplyPrice()).isEqualByComparingTo("100");
+    }
 }
+

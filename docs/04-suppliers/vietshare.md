@@ -27,7 +27,7 @@ timestamp|nonce|METHOD|PATH_WITH_QUERY|sha256(raw_body)
 
 | Field | Mô tả |
 |---|---|
-| `timestamp` | Unix Epoch milliseconds. Lệch > 5 phút → bị từ chối |
+| `timestamp` | Unix Epoch seconds (10 chữ số). Lệch > 5 phút → bị từ chối |
 | `nonce` | UUID ngẫu nhiên, chống Replay Attack |
 | `METHOD` | HTTP method (GET, POST, PUT, DELETE) — viết hoa |
 | `PATH_WITH_QUERY` | Đường dẫn + query params. VD: `/v1/orders?type=email` |

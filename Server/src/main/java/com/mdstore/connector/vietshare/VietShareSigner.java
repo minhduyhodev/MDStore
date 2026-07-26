@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 import java.util.HexFormat;
 import java.util.UUID;
 
@@ -40,7 +41,7 @@ public class VietShareSigner {
      * @return SignedHeaders chứa đủ 4 header để gửi lên VietShare
      */
     public SignedHeaders sign(String method, String pathWithQuery, byte[] rawBody) {
-        String timestamp = String.valueOf(System.currentTimeMillis());
+        String timestamp = String.valueOf(Instant.now().getEpochSecond());
         String nonce     = UUID.randomUUID().toString();
 
         byte[] bodyBytes  = (rawBody != null) ? rawBody : new byte[0];

@@ -86,7 +86,7 @@ class VietShareConnectorPlaceOrderTest {
         
         wireMock.verify(postRequestedFor(urlEqualTo("/v1/orders"))
                 .withHeader("X-Shop-API-ID", equalTo("test-api-key"))
-                .withHeader("X-Timestamp", matching("\\d{13}"))
+                .withHeader("X-Timestamp", matching("\\d{10}"))
                 .withHeader("X-Nonce", matching("[0-9a-f-]{36}"))
                 .withHeader("X-Signature", matching("[0-9a-f]{64}")));
     }
