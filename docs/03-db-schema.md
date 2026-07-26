@@ -60,9 +60,23 @@ erDiagram
         varchar(50) order_no UK "MDStore internal order number"
         bigint user_id "Logical FK → users.id"
         bigint product_id "Logical FK → products.id"
+        integer quantity
         numeric(15_2) total_amount
         varchar(50) status "xem bảng trạng thái bên dưới"
         varchar(255) idempotency_key "UUID, giữ nguyên khi retry"
+        varchar(50) supplier_code
+        varchar(100) supplier_external_code "snapshot để retry"
+        numeric(15_2) max_unit_price "snapshot để retry"
+        varchar(255) coupon_code "snapshot để retry"
+        varchar(255) flash_sale_id "snapshot để retry"
+        integer retry_attempt "số retry đã được lên lịch, 0..3"
+        timestamp next_retry_at
+        varchar(50) last_error_code
+        varchar(500) last_error_message
+        varchar(36) retry_claim_token
+        timestamp retry_lease_until
+        varchar(255) supplier_order_id
+        bigint version "optimistic lock"
         timestamp created_at
         timestamp updated_at
     }
@@ -81,12 +95,13 @@ erDiagram
 
 | Status | Ý nghĩa | Bước tiếp theo |
 |---|---|---|
-| `PENDING` | Đơn vừa tạo, chưa gửi đến supplier | Gọi VietShare API |
-| `COMPLETED` | VietShare trả hàng thành công | Không có |
-| `FAILED_PRICE_CHANGED` | VietShare từ chối vì giá thay đổi | Hoàn tiền user / yêu cầu xác nhận giá mới |
-| `FAILED_OUT_OF_STOCK` | VietShare báo hết hàng | Hoàn tiền user |
-| `FAILED` | Lỗi khác không retry được | Hoàn tiền user, alert admin |
-| `PROCESSING_RETRY` | Đang chờ retry (timeout / 429 / 5xx) | Background job retry với Exponential Backoff |
+| `PENDING` | Đơn vừa tạo, chưa gửi đến supplier | Gọi Supplier API lần đầu |
+| `PROCESSING_RETRY` | Đang chờ đến `next_retry_at` | Background job claim đơn |
+| `RETRYING` | Background job đã claim đơn và đang gọi supplier | Hoàn tất, lên lịch retry tiếp hoặc fail; lease hết hạn thì recover |
+| `COMPLETED` | Supplier trả hàng thành công | Không có |
+| `FAILED_PRICE_CHANGED` | Supplier từ chối vì giá thay đổi | Hoàn tiền user / yêu cầu xác nhận giá mới |
+| `FAILED_OUT_OF_STOCK` | Supplier báo hết hàng | Hoàn tiền user |
+| `FAILED` | Lỗi khác không retry được hoặc đã hết 3 retry | Hoàn tiền user, alert admin |
 
 ---
 
@@ -131,15 +146,29 @@ CREATE TABLE supplier_products (
 
 -- 4. Đơn hàng
 CREATE TABLE orders (
-    id               BIGSERIAL PRIMARY KEY,
-    order_no         VARCHAR(50)    NOT NULL UNIQUE,
-    user_id          BIGINT         NOT NULL,     -- Logical FK → users.id
-    product_id       BIGINT         NOT NULL,     -- Logical FK → products.id
-    total_amount     NUMERIC(15, 2) NOT NULL,
-    status           VARCHAR(50)    NOT NULL,
-    idempotency_key  VARCHAR(255),
-    created_at       TIMESTAMP      DEFAULT CURRENT_TIMESTAMP,
-    updated_at       TIMESTAMP      DEFAULT CURRENT_TIMESTAMP
+    id                     BIGSERIAL PRIMARY KEY,
+    order_no               VARCHAR(50)    NOT NULL UNIQUE,
+    user_id                BIGINT         NOT NULL,     -- Logical FK → users.id
+    product_id             BIGINT         NOT NULL,     -- Logical FK → products.id
+    quantity               INTEGER        NOT NULL,
+    total_amount           NUMERIC(15, 2) NOT NULL,
+    status                 VARCHAR(50)    NOT NULL,
+    idempotency_key        VARCHAR(255)   NOT NULL UNIQUE,
+    supplier_code          VARCHAR(50)    NOT NULL,
+    supplier_external_code VARCHAR(100)   NOT NULL,
+    max_unit_price         NUMERIC(15, 2) NOT NULL,
+    coupon_code            VARCHAR(255),
+    flash_sale_id          VARCHAR(255),
+    retry_attempt          INTEGER        NOT NULL DEFAULT 0,
+    next_retry_at          TIMESTAMP,
+    last_error_code        VARCHAR(50),
+    last_error_message     VARCHAR(500),
+    retry_claim_token      VARCHAR(36),
+    retry_lease_until      TIMESTAMP,
+    supplier_order_id      VARCHAR(255),
+    version                BIGINT         NOT NULL DEFAULT 0,
+    created_at             TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at             TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 5. Tài khoản đã giao
@@ -174,6 +203,14 @@ CREATE UNIQUE INDEX idx_orders_idempotency
 -- Tra cứu sản phẩm theo nhà cung cấp
 CREATE INDEX idx_supplier_products_sid_pid
     ON supplier_products (supplier_id, product_id);
+
+-- Claim các đơn retry đến hạn
+CREATE INDEX idx_orders_retry_due
+    ON orders (status, next_retry_at);
+
+-- Recover worker bị crash sau khi đã claim
+CREATE INDEX idx_orders_retry_lease
+    ON orders (status, retry_lease_until);
 
 -- Tra cứu tài khoản đã giao theo đơn hàng
 CREATE INDEX idx_delivered_accounts_order_id

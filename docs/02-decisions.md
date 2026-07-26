@@ -126,12 +126,16 @@ interface SupplierAdapter {
 - Lỗi 5xx từ VietShare thường là tạm thời.
 
 **Chiến lược retry được phép:**
-- Chỉ retry khi: Network Timeout, HTTP 429, HTTP 5xx.
-- **Không retry** khi: HTTP 400, 401, 409 (PRICE_CHANGED, OUT_OF_STOCK) — đây là lỗi logic, không phải lỗi tạm thời.
-- Thời gian backoff: 5s → 15s → 30s (tối đa 3 lần).
+- Retry khi: Network Timeout, HTTP 429, HTTP 5xx.
+- Riêng HTTP 409 chỉ retry khi supplier trả đúng mã `REQUEST_IN_PROGRESS`; giữ nguyên `Idempotency-Key`. Không retry `PRICE_CHANGED`, `OUT_OF_STOCK` hoặc 409 không nhận diện.
+- **Không retry** khi: HTTP 400, 401 và các lỗi 409 nghiệp vụ nêu trên.
+- Lần gọi đầu không tính là retry. Cho phép tối đa 3 lần retry sau lần đầu (tối đa 4 lần gọi supplier).
+- Backoff trước 3 lần retry lần lượt là 5s → 15s → 30s.
+- Nếu supplier trả `Retry-After`, dùng `min(60s, max(backoff, Retry-After hợp lệ))`.
+- Mọi retry chạy qua background job; request HTTP ban đầu không sleep/chờ đồng bộ.
 
 **Đánh đổi:**
-- Đơn hàng ở trạng thái `PROCESSING_RETRY` có thể chờ tới 50 giây trước khi resolve.
+- Đơn hàng ở trạng thái `PROCESSING_RETRY` có thể chờ lâu hơn 50 giây nếu supplier yêu cầu `Retry-After` lớn hơn backoff (nhưng mỗi lần chờ bị giới hạn 60 giây).
 
 ---
 
