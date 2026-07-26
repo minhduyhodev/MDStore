@@ -39,7 +39,7 @@ public class OrderOrchestrationService {
         this.connectorRegistry = connectorRegistry;
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = OrderPriceChangedException.class)
     public OrderResponse placeOrder(CreateOrderRequest request) {
         Long productId;
         try {
@@ -112,11 +112,16 @@ public class OrderOrchestrationService {
 
         } catch (SupplierException e) {
             // Lỗi từ supplier (VD: PRICE_CHANGED, OUT_OF_STOCK, RATE_LIMITED)
-            log.warn("Supplier {} returned error for order {}: {}", 
+            log.warn("Supplier {} returned error for order {}: {}",
                     chosenSupplier.getSupplierCode(), orderNo, e.getErrorCode());
-            
-            // TODO: Ở các task tiếp theo, sẽ xử lý riêng các mã lỗi này
-            // Tạm thời ném ra để Controller xử lý (nếu có GlobalExceptionHandler)
+
+            if (e.getErrorCode() == SupplierException.ErrorCode.PRICE_CHANGED) {
+                order.setStatus("FAILED_PRICE_CHANGED");
+                orderRepository.save(order);
+                throw new OrderPriceChangedException();
+            }
+
+            // Các mã lỗi supplier khác được xử lý ở các task tiếp theo.
             throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR, "Lỗi từ nhà cung cấp: " + e.getMessage());
         }
     }

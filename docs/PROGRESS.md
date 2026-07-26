@@ -56,34 +56,38 @@
 
 ---
 
-### Task: Cập nhật luồng xử lý lỗi PRICE_CHANGED trong OrderOrchestrationService
+### Task: Viết OrderOrchestrationService retry/backoff (Exponential Backoff, giữ Idempotency-Key)
 
 **Trạng thái**: Plan — bước 1/6
 
 **1. Plan (phân tích + lên kế hoạch)**
-- [ ] Đọc các file liên quan (ghi rõ file nào): ...
-- [ ] Xác định phạm vi: file/class nào sẽ tạo mới, file nào sẽ sửa
-- [ ] Nếu có điểm mơ hồ ảnh hưởng DB/tiền/bảo mật → dừng, hỏi theo giao thức CLAUDE.md mục 6
-- [ ] Chia nhỏ task thành các bước code cụ thể (liệt kê ra đây)
+- [ ] Đọc các file liên quan: `02-decisions.md`, `03-db-schema.md`, `04-suppliers/vietshare.md`, `05-business-flows.md`, `OrderOrchestrationService`, `SupplierException`, `OrderEntity`, `OrderRepository` và các test liên quan
+- [ ] Xác định phạm vi: cơ chế chuyển `PROCESSING_RETRY`, job retry, số lần thử và lưu trạng thái/backoff
+- [ ] Nếu có điểm mơ hồ ảnh hưởng DB/tiền/bảo mật → dừng, hỏi theo giao thức `CLAUDE.md` mục 6
+- [ ] Chia task [M] thành các vòng code/test nhỏ
 
 **2. Code**
-- [ ] Bước 2.1: ...
+- [ ] Bước 2.1: Xử lý lỗi retryable và giữ nguyên Idempotency-Key
+- [ ] Bước 2.2: Cài đặt job retry với Exponential Backoff
 
 **3. Test**
-- [ ] Viết unit test cho logic mới/thay đổi
+- [ ] Viết unit test cho logic retry/backoff
+- [ ] Viết integration test nếu có gọi API/DB thật
+- [ ] Chạy toàn bộ test suite — ghi lại kết quả
 
 **4. Self-review (agent tự soát trước khi báo cáo)**
 - [ ] Đọc lại code vừa viết như người review, không phải người viết
+- [ ] Không còn TODO thuộc phạm vi task, debug code hoặc secret hardcode
+- [ ] Kiểm tra naming/convention và quy tắc trong `CLAUDE.md`
 
 **5. Cập nhật tài liệu (nếu có ảnh hưởng)**
-- [ ] Cập nhật ...
+- [ ] Xác nhận hoặc cập nhật business flow/schema/ADR liên quan retry
 
 **6. Done — chỉ tick khi 1-5 đã xong hết**
 - [ ] Di chuyển task xuống mục "Done" (1 dòng tóm tắt)
 - [ ] Điền "Bước tiếp theo cụ thể" cho task mới lấy từ Backlog vào Current focus
 
-**Bước tiếp theo cụ thể**: Lên kế hoạch cho luồng PRICE_CHANGED (cập nhật status, gửi thông báo user).
-
+**Bước tiếp theo cụ thể**: Phân tích Flow 2 và ADR-006, sau đó chia retry/backoff thành các vòng code/test nhỏ.
 
 ---
 
@@ -94,7 +98,6 @@
 > - `[M]` = cần vài vòng Plan→Test lặp lại
 > - `[L]` = quá to, **PHẢI tách nhỏ hơn nữa trước khi bắt đầu**, không được giữ nguyên
 
-- [ ] [S] Viết OrderOrchestrationService: PRICE_CHANGED flow (thông báo user, cập nhật order status)
 - [ ] [M] Viết OrderOrchestrationService: retry/backoff (Exponential Backoff, giữ Idempotency-Key)
 - [ ] [S] L.1: Confirm schema `supplier_products` (đã xong một phần, cần review thêm field)
 - [ ] [M] L.2: Thiết kế schema `orders` ✅ (Đã hoàn thành cơ bản qua Routing Logic)
@@ -109,6 +112,7 @@
 
 ## Done (chỉ 1 dòng/task, chi tiết xem git log)
 
+- [x] 2026-07-26 — Hoàn thiện PRICE_CHANGED flow: lưu `FAILED_PRICE_CHANGED`, trả error envelope `ORDER_PRICE_CHANGED` với HTTP 409, kết nối POST order vào orchestration service; toàn bộ 36/36 test pass.
 - [x] 2026-07-26 — Dọn dẹp + sửa lỗi header tài liệu (xem báo cáo đầy đủ bên dưới)
 - [x] 2026-07-26 — Bảo mật secrets: tạo .gitignore, .env.example, ẩn toàn bộ URL/credentials vào env var, sửa application.yml bỏ fallback hardcode, sửa README.md (task chèn ngang)
 - [x] 2026-07-26 — Setup base FE React: Next.js App Router + JavaScript + Tailwind CSS tại client/, layout.js + 3 trang (catalog/orders/wallet) với "use client", api.js xử lý envelope ADR-007, tạo docs/09-frontend.md (task chèn ngang)
