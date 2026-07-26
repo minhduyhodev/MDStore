@@ -54,6 +54,7 @@ public class OrderPersistenceService {
                               String errorCode, String errorMessage) {
         OrderEntity order = loadCurrentAttempt(attempt);
         order.markProcessingRetry(schedule.retryAttempt(), schedule.nextRetryAt(), errorCode, errorMessage);
+        order.touch(clock.instant());
     }
 
     @Transactional

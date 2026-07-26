@@ -56,38 +56,34 @@
 
 ---
 
-### Task: Viết OrderOrchestrationService retry/backoff (Exponential Backoff, giữ Idempotency-Key)
+### Task: [S] Trang Chi tiết Đơn hàng (orders/[id])
 
 **Trạng thái**: Plan — bước 1/6
 
 **1. Plan (phân tích + lên kế hoạch)**
-- [ ] Đọc các file liên quan: `02-decisions.md`, `03-db-schema.md`, `04-suppliers/vietshare.md`, `05-business-flows.md`, `OrderOrchestrationService`, `SupplierException`, `OrderEntity`, `OrderRepository` và các test liên quan
-- [ ] Xác định phạm vi: cơ chế chuyển `PROCESSING_RETRY`, job retry, số lần thử và lưu trạng thái/backoff
-- [ ] Nếu có điểm mơ hồ ảnh hưởng DB/tiền/bảo mật → dừng, hỏi theo giao thức `CLAUDE.md` mục 6
-- [ ] Chia task [M] thành các vòng code/test nhỏ
+- [ ] Đọc các file liên quan: `docs/09-frontend.md`, `docs/05-business-flows.md`, `src/app/orders/page.js`
+- [ ] Xác định phạm vi: Tạo folder `src/app/orders/[id]` và file `page.js`. Cần giao diện hiển thị chi tiết (trạng thái, ngày đặt), chi tiết sản phẩm, danh sách account trả về (`delivered_accounts`), và form xác nhận giá mới nếu bị lỗi `PRICE_CHANGED`.
+- [ ] Chia nhỏ task: 1. Setup layout trang tĩnh. 2. Fetch mock data và render thông tin đơn. 3. Thêm vùng hiển thị account và vùng xử lý lỗi đổi giá.
 
 **2. Code**
-- [ ] Bước 2.1: Xử lý lỗi retryable và giữ nguyên Idempotency-Key
-- [ ] Bước 2.2: Cài đặt job retry với Exponential Backoff
+- [ ] Bước 2.1: Tạo file và layout cơ bản (Grid/Flex)
+- [ ] Bước 2.2: Render thông tin đơn hàng và badge trạng thái
+- [ ] Bước 2.3: Render `delivered_accounts` (nếu có) và form báo giá mới (nếu `FAILED_PRICE_CHANGED`)
 
 **3. Test**
-- [ ] Viết unit test cho logic retry/backoff
-- [ ] Viết integration test nếu có gọi API/DB thật
-- [ ] Chạy toàn bộ test suite — ghi lại kết quả
+- [ ] Kiểm tra responsive và test các luồng hiển thị trạng thái khác nhau (COMPLETED, PENDING, FAILED_PRICE_CHANGED).
 
 **4. Self-review (agent tự soát trước khi báo cáo)**
-- [ ] Đọc lại code vừa viết như người review, không phải người viết
-- [ ] Không còn TODO thuộc phạm vi task, debug code hoặc secret hardcode
-- [ ] Kiểm tra naming/convention và quy tắc trong `CLAUDE.md`
+- [ ] Đảm bảo đúng chuẩn Design System (màu Emerald, font Outfit/DM Sans, border-slate-200, không drop-shadow-lg lạm dụng).
+- [ ] Code React gọn gàng, dùng Lucide icons.
 
 **5. Cập nhật tài liệu (nếu có ảnh hưởng)**
-- [ ] Xác nhận hoặc cập nhật business flow/schema/ADR liên quan retry
+- [ ] Cập nhật thêm vào PROGRESS.md khi hoàn thành.
 
 **6. Done — chỉ tick khi 1-5 đã xong hết**
-- [ ] Di chuyển task xuống mục "Done" (1 dòng tóm tắt)
-- [ ] Điền "Bước tiếp theo cụ thể" cho task mới lấy từ Backlog vào Current focus
+- [ ] Di chuyển task xuống mục "Done".
 
-**Bước tiếp theo cụ thể**: Phân tích Flow 2 và ADR-006, sau đó chia retry/backoff thành các vòng code/test nhỏ.
+**Bước tiếp theo cụ thể**: Trình bày hướng thiết kế (2-3 câu) cho user duyệt. Chờ duyệt rồi bắt tay vào Bước 2 (Code).
 
 ---
 
@@ -107,6 +103,19 @@
 - [ ] [S] Viết Flyway migration script từ DDL đã thiết kế ở L.4
 - [ ] [M] L.3: Thiết kế schema `users` + balance ← **block bởi Q-005** (ví nội bộ vs payment gateway chưa quyết định)
 
+
+---
+
+## Backlog Frontend (chưa làm, thứ tự ưu tiên từ trên xuống)
+
+- [ ] [S] Trang Chi tiết Đơn hàng (`orders/[id]`) — core flow, hiển thị thông tin tài khoản và xử lý PRICE_CHANGED.
+- [ ] [M] Trang Quản lý Supplier Admin (`admin/suppliers`) — quản lý nguồn cung cấp.
+- [ ] [M] Trang Chi tiết Sản phẩm (`catalog/[id]`) — không gấp, làm sau.
+
+**Các trang đang bị block (Chờ Backend / Quyết định):**
+- [ ] Trang Đăng nhập / Hồ sơ cá nhân (Auth/Profile) — Blocked bởi Q-005 và Backend schema users.
+- [ ] Trang Admin Pricing — Blocked bởi Q-003.
+- [ ] Trang Order Reconciliation (Đối soát) — Blocked bởi task Backend tương ứng.
 
 ---
 
