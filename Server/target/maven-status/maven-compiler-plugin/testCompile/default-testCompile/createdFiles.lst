@@ -1,0 +1,14 @@
+com\mdstore\catalog\web\CatalogControllerTest.class
+com\mdstore\common\web\GlobalExceptionHandlerTest.class
+com\mdstore\connector\vietshare\VietShareConnectorPlaceOrderTest.class
+com\mdstore\order\service\OrderPersistenceServiceTest.class
+com\mdstore\order\service\OrderRetryWorkerTest.class
+com\mdstore\order\service\OrderRetryPolicyTest.class
+com\mdstore\connector\ConnectorRegistryTest.class
+com\mdstore\connector\vietshare\VietShareConnectorFetchCatalogTest.class
+com\mdstore\order\service\OrderAttemptServiceTest.class
+com\mdstore\connector\vietshare\VietShareSignerTest.class
+com\mdstore\catalog\service\CatalogSyncServiceTest.class
+com\mdstore\order\service\OrderOrchestrationServiceTest.class
+com\mdstore\order\web\OrderControllerTest.class
+com\mdstore\connector\vietshare\VietShareSignerTest$TestableVietShareSigner.class

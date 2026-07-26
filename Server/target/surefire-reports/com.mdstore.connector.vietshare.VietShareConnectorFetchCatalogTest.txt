@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.mdstore.connector.vietshare.VietShareConnectorFetchCatalogTest
 -------------------------------------------------------------------------------
-Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.514 s -- in com.mdstore.connector.vietshare.VietShareConnectorFetchCatalogTest
+Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.384 s -- in com.mdstore.connector.vietshare.VietShareConnectorFetchCatalogTest

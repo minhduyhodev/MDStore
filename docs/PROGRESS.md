@@ -56,24 +56,24 @@
 
 ---
 
-### Task: [M] Trang Quản lý Supplier Admin (admin/suppliers)
+### Task: [M] Trang Chi tiết Sản phẩm (catalog/[id])
 
 **Trạng thái**: Plan — bước 1/6
 
 **1. Plan (phân tích + lên kế hoạch)**
-- [ ] Đọc các file liên quan: `docs/09-frontend.md`, stub API (nếu cần), Backlog Backend.
-- [ ] Xác định phạm vi: Tạo trang hiển thị danh sách nguồn cung cấp (VietShare, v.v.), trạng thái, số dư hiện tại.
-- [ ] Chia nhỏ task: 1. Setup layout. 2. Fetch mock data & render bảng.
+- [ ] Đọc các file liên quan: `docs/09-frontend.md`, route GET `/api/catalog/{id}`.
+- [ ] Xác định phạm vi: Tạo trang/modal hiển thị chi tiết sản phẩm, giá cả, trạng thái kho và nút đặt hàng.
+- [ ] Chia nhỏ task: 1. Fetch mock data chi tiết. 2. Code layout.
 
 **2. Code**
 - [ ] Bước 2.1: ...
 - [ ] Bước 2.2: ...
 
 **3. Test**
-- [ ] Test layout responsive
+- [ ] Test hiển thị dữ liệu chính xác.
 
 **4. Self-review (agent tự soát trước khi báo cáo)**
-- [ ] Kiểm tra tuân thủ Design System (DM Sans, Outfit, Emerald color).
+- [ ] Tuân thủ Design System.
 
 **5. Cập nhật tài liệu (nếu có ảnh hưởng)**
 - [ ] Cập nhật PROGRESS.md khi hoàn thành.
@@ -81,7 +81,7 @@
 **6. Done — chỉ tick khi 1-5 đã xong hết**
 - [ ] Di chuyển task xuống mục "Done".
 
-**Bước tiếp theo cụ thể**: Chuẩn bị mockup/thiết kế và chờ user duyệt trước khi code.
+**Bước tiếp theo cụ thể**: Lên thiết kế layout và chờ duyệt.
 
 ---
 
@@ -92,7 +92,6 @@
 > - `[M]` = cần vài vòng Plan→Test lặp lại
 > - `[L]` = quá to, **PHẢI tách nhỏ hơn nữa trước khi bắt đầu**, không được giữ nguyên
 
-- [ ] [M] Viết OrderOrchestrationService: retry/backoff — code/docs/test đã viết; còn chạy full suite + self-review cuối (không dùng Flyway migration theo quyết định owner)
 - [ ] [S] L.1: Confirm schema `supplier_products` (đã xong một phần, cần review thêm field)
 - [ ] [M] L.2: Thiết kế schema `orders` ✅ (Đã hoàn thành cơ bản qua Routing Logic)
 - [ ] [S] WalletService: Đọc balance qua GET /v1/account từ VietShare (Task mới bổ sung)
@@ -107,7 +106,7 @@
 ## Backlog Frontend (chưa làm, thứ tự ưu tiên từ trên xuống)
 
 - [x] [S] Trang Chi tiết Đơn hàng (`orders/[id]`) — core flow, hiển thị thông tin tài khoản và xử lý PRICE_CHANGED.
-- [ ] [M] Trang Quản lý Supplier Admin (`admin/suppliers`) — quản lý nguồn cung cấp.
+- [x] [M] Trang Quản lý Supplier Admin (`admin/suppliers`) — quản lý nguồn cung cấp.
 - [ ] [M] Trang Chi tiết Sản phẩm (`catalog/[id]`) — không gấp, làm sau.
 
 **Các trang đang bị block (Chờ Backend / Quyết định):**
@@ -119,6 +118,8 @@
 
 ## Done (chỉ 1 dòng/task, chi tiết xem git log)
 
+- [x] 2026-07-26 — Hoàn thiện UI Trang Quản lý Supplier Admin (admin/suppliers): bảng mật độ cao, kill switch có xác nhận modal, health check có loading, không lộ API key. Cập nhật Sidebar sang theme Emerald.
+- [x] 2026-07-26 — Hoàn thiện OrderOrchestrationService retry/backoff: persisted state machine, 3 retry 5s/15s/30s, giữ Idempotency-Key, Retry-After tối đa 60s, worker claim/lease, HTTP 202; toàn bộ 51/51 test pass. Không thêm Flyway migration theo quyết định owner.
 - [x] 2026-07-26 — Thiết kế UI Trang Chi tiết Đơn hàng (orders/[id]) với layout 2 cột, logic hiển thị account và Form xử lý giá đổi (PRICE_CHANGED) theo đúng Design System. Cập nhật routing trong orders list.
 
 - [x] 2026-07-26 — Hoàn thiện PRICE_CHANGED flow: lưu `FAILED_PRICE_CHANGED`, trả error envelope `ORDER_PRICE_CHANGED` với HTTP 409, kết nối POST order vào orchestration service; toàn bộ 36/36 test pass.

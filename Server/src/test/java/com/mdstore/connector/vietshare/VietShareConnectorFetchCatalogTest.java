@@ -33,7 +33,7 @@ class VietShareConnectorFetchCatalogTest {
         wireMock.start();
 
         VietShareProperties props = new VietShareProperties(
-                "http://localhost:" + wireMock.port(),
+                "http://localhost:" + wireMock.port() + "/v1",
                 "test-api-key",
                 "test-api-secret",
                 5, 10

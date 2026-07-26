@@ -39,7 +39,7 @@ mdstore:
   orders:
     retry:
       enabled: true
-      poll-delay: 1s
+      poll-delay: 1000
       batch-size: 50
       lease-duration: 60s
       retry-after-cap: 60s

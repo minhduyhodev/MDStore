@@ -22,6 +22,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
+import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -44,19 +45,32 @@ public class VietShareConnector implements SupplierConnector {
     private final RestClient restClient;
     private final VietShareSigner signer;
     private final ObjectMapper objectMapper;
+    private final URI apiBaseUri;
 
     public VietShareConnector(VietShareProperties props, VietShareSigner signer, ObjectMapper objectMapper) {
         this.signer = signer;
         this.objectMapper = objectMapper;
+        this.apiBaseUri = normalizeApiBaseUri(props.apiUrl());
 
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout((int) Duration.ofSeconds(props.connectTimeoutSeconds()).toMillis());
         factory.setReadTimeout((int) Duration.ofSeconds(props.readTimeoutSeconds()).toMillis());
 
         this.restClient = RestClient.builder()
-                .baseUrl(props.apiUrl())
                 .requestFactory(factory)
                 .build();
+    }
+
+    private URI normalizeApiBaseUri(String configuredUrl) {
+        String normalized = configuredUrl.replaceAll("/+$", "");
+        if (normalized.endsWith("/v1")) {
+            normalized = normalized.substring(0, normalized.length() - 3);
+        }
+        return URI.create(normalized);
+    }
+
+    private URI endpoint(String path) {
+        return apiBaseUri.resolve(path);
     }
 
     @Override
@@ -88,7 +102,7 @@ public class VietShareConnector implements SupplierConnector {
 
         try {
             VsProductListResponse response = restClient.get()
-                    .uri("/v1/products")
+                    .uri(endpoint("/v1/products"))
                     .header("X-Shop-API-ID", headers.xShopApiId())
                     .header("X-Timestamp",   headers.xTimestamp())
                     .header("X-Nonce",       headers.xNonce())
@@ -157,7 +171,7 @@ public class VietShareConnector implements SupplierConnector {
 
         try {
             VsOrderResponse response = restClient.post()
-                    .uri("/v1/orders")
+                    .uri(endpoint("/v1/orders"))
                     .header("X-Shop-API-ID", headers.xShopApiId())
                     .header("X-Timestamp",   headers.xTimestamp())
                     .header("X-Nonce",       headers.xNonce())

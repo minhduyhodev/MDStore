@@ -26,7 +26,7 @@ public class OrderRetryWorker {
         this.retryPolicy = retryPolicy;
     }
 
-    @Scheduled(fixedDelayString = "${mdstore.orders.retry.poll-delay:1s}")
+    @Scheduled(fixedDelayString = "${mdstore.orders.retry.poll-delay:1000}")
     public void processDueRetries() {
         int recovered = persistenceService.recoverExpiredLeases(retryPolicy.now());
         if (recovered > 0) {
