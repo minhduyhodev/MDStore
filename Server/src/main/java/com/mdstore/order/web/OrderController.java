@@ -1,6 +1,7 @@
 package com.mdstore.order.web;
 
 import com.mdstore.common.web.ApiResponse;
+import com.mdstore.order.service.OrderOrchestrationService;
 import com.mdstore.order.web.dto.CreateOrderRequest;
 import com.mdstore.order.web.dto.OrderResponse;
 import jakarta.validation.Valid;
@@ -16,10 +17,15 @@ import java.util.List;
 @RequestMapping("/api/orders")
 public class OrderController {
 
+    private final OrderOrchestrationService orderOrchestrationService;
+
+    public OrderController(OrderOrchestrationService orderOrchestrationService) {
+        this.orderOrchestrationService = orderOrchestrationService;
+    }
+
     @PostMapping
     public ApiResponse<OrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request) {
-        // TODO: Gọi OrderOrchestrationService
-        throw new UnsupportedOperationException("Chưa triển khai");
+        return ApiResponse.ok(orderOrchestrationService.placeOrder(request));
     }
 
     @GetMapping

@@ -125,17 +125,20 @@ Content-Type: application/json
     - Hoàn số dư user
     - Alert Admin
     
-3C. Vẫn timeout/429/5xx:
-    - Nếu chưa đủ 3 lần: cập nhật updated_at, chờ backoff tiếp
-    - Nếu đã 3 lần: UPDATE orders SET status = 'FAILED', alert Admin
+3C. Vẫn timeout/429/5xx hoặc 409 REQUEST_IN_PROGRESS:
+    - Nếu chưa chạy đủ 3 retry: cập nhật retry_attempt + next_retry_at và chờ backoff tiếp
+    - Nếu retry thứ 3 vẫn fail: UPDATE orders SET status = 'FAILED', alert Admin
 ```
 
-**Thời gian backoff giữa các lần retry:**
+**Thời gian backoff (lần gọi đầu không tính là retry):**
 ```
-Lần 1 → Lần 2: chờ 5 giây
-Lần 2 → Lần 3: chờ 15 giây
-Lần 3 → Fail:  chờ 30 giây rồi đánh dấu FAILED
+Lần gọi đầu fail → Retry 1: chờ 5 giây
+Retry 1 fail     → Retry 2: chờ 15 giây
+Retry 2 fail     → Retry 3: chờ 30 giây
+Retry 3 fail     → đánh dấu FAILED ngay
 ```
+
+Nếu supplier trả `Retry-After` hợp lệ, dùng `min(60 giây, max(backoff, Retry-After))`. Job dựng lại request từ snapshot đã lưu và luôn dùng `idempotency_key` gốc.
 
 > **Lưu ý quan trọng:** Nếu VietShare trả HTTP 200 sau lần retry (idempotent response), dữ liệu trả về vẫn là dữ liệu tài khoản thực — phải xử lý giống như lần đầu thành công.
 

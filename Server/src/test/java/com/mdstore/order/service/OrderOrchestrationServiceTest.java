@@ -3,10 +3,12 @@ package com.mdstore.order.service;
 import com.mdstore.catalog.domain.SupplierProductEntity;
 import com.mdstore.catalog.repository.SupplierProductRepository;
 import com.mdstore.common.web.ApiException;
+import com.mdstore.common.web.ErrorCode;
 import com.mdstore.connector.ConnectorRegistry;
 import com.mdstore.connector.OrderRequest;
 import com.mdstore.connector.OrderResult;
 import com.mdstore.connector.SupplierConnector;
+import com.mdstore.connector.SupplierException;
 import com.mdstore.order.domain.OrderEntity;
 import com.mdstore.order.repository.OrderRepository;
 import com.mdstore.order.web.dto.CreateOrderRequest;
@@ -17,7 +19,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -99,5 +103,41 @@ class OrderOrchestrationServiceTest {
         assertThatThrownBy(() -> service.placeOrder(request))
                 .isInstanceOf(ApiException.class)
                 .hasMessageContaining("Sản phẩm tạm hết hàng");
+    }
+
+    @Test
+    void placeOrder_doesNotRollbackPriceChangedStatus() throws NoSuchMethodException {
+        Method method = OrderOrchestrationService.class.getMethod("placeOrder", CreateOrderRequest.class);
+        Transactional transactional = method.getAnnotation(Transactional.class);
+
+        assertThat(transactional).isNotNull();
+        assertThat(transactional.noRollbackFor()).contains(OrderPriceChangedException.class);
+    }
+
+    @Test
+    void placeOrder_whenSupplierPriceChanged_savesFailedStatusAndNotifiesUser() {
+        // Arrange
+        Long productId = 42L;
+        CreateOrderRequest request = new CreateOrderRequest("42", 1, null);
+        SupplierProductEntity supplier = new SupplierProductEntity(
+                productId, "VIETSHARE", "EXT-1", new BigDecimal("80"), true, null);
+
+        when(supplierProductRepository.findByProductIdAndIsActiveTrueOrderBySupplyPriceAsc(productId))
+                .thenReturn(List.of(supplier));
+        when(connectorRegistry.getConnector("VIETSHARE")).thenReturn(supplierConnector);
+        when(supplierConnector.placeOrder(any(OrderRequest.class)))
+                .thenThrow(new SupplierException(
+                        SupplierException.ErrorCode.PRICE_CHANGED,
+                        "Supplier price changed"));
+
+        // Act & Assert
+        assertThatThrownBy(() -> service.placeOrder(request))
+                .isInstanceOf(OrderPriceChangedException.class)
+                .satisfies(e -> assertThat(((ApiException) e).getErrorCode())
+                        .isEqualTo(ErrorCode.ORDER_PRICE_CHANGED));
+
+        ArgumentCaptor<OrderEntity> orderCaptor = ArgumentCaptor.forClass(OrderEntity.class);
+        verify(orderRepository, org.mockito.Mockito.times(2)).save(orderCaptor.capture());
+        assertThat(orderCaptor.getAllValues().get(1).getStatus()).isEqualTo("FAILED_PRICE_CHANGED");
     }
 }

@@ -132,19 +132,22 @@ Idempotency-Key: {uuid-của-đơn-hàng-nội-bộ}
 ## Quy Tắc Retry
 
 ```
-Được phép retry: Network Timeout | HTTP 429 | HTTP 5xx
-KHÔNG retry:     HTTP 400 | HTTP 401 | HTTP 409
+Được phép retry: Network Timeout | HTTP 429 | HTTP 5xx | HTTP 409 REQUEST_IN_PROGRESS
+KHÔNG retry:     HTTP 400 | HTTP 401 | HTTP 409 PRICE_CHANGED/OUT_OF_STOCK/không nhận diện
 ```
 
 **Thời gian Exponential Backoff:**
 ```
-Lần 1: chờ 5 giây
-Lần 2: chờ 15 giây
-Lần 3: chờ 30 giây
-→ Sau 3 lần vẫn fail: cập nhật status = FAILED, alert Admin
+Lần gọi đầu: gọi ngay, chưa tính là retry
+Retry 1: chờ 5 giây
+Retry 2: chờ 15 giây
+Retry 3: chờ 30 giây
+→ Retry 3 vẫn fail: cập nhật status = FAILED, alert Admin
 ```
 
-**Bắt buộc:** Khi retry, giữ nguyên `Idempotency-Key` của lần gửi đầu tiên.
+Nếu response có `Retry-After` hợp lệ, delay là `min(60 giây, max(backoff, Retry-After))`.
+
+**Bắt buộc:** Khi retry, giữ nguyên `Idempotency-Key` của lần gửi đầu tiên. Timestamp, nonce và HMAC signature được tạo mới cho từng HTTP request.
 
 ---
 
