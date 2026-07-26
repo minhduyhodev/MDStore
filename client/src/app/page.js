@@ -8,6 +8,6 @@
 import { redirect } from 'next/navigation';
 
 export default function Home() {
-  // Redirect về /catalog làm trang mặc định
-  redirect('/catalog');
+  // Redirect về /login để demo flow đăng nhập
+  redirect('/login');
 }
