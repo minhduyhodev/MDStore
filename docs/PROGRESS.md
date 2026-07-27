@@ -56,32 +56,43 @@
 
 ---
 
-### Task: [M] Trang Chi tiết Sản phẩm (catalog/[id])
+### Task: [M] FE-01 — Trang Chi tiết Sản phẩm (`catalog/[id]`)
 
 **Trạng thái**: Plan — bước 1/6
 
+**Mục tiêu:** Từ danh sách catalog, người dùng có thể mở trang sản phẩm, xem giá/tồn kho/chi tiết và bắt đầu luồng đặt hàng. API thật sẽ dùng `GET /api/catalog/{id}` khi backend hoàn thiện; task này có thể dựng UI với mock data cùng contract trước.
+
 **1. Plan (phân tích + lên kế hoạch)**
-- [ ] Đọc các file liên quan: `docs/09-frontend.md`, route GET `/api/catalog/{id}`.
-- [ ] Xác định phạm vi: Tạo trang/modal hiển thị chi tiết sản phẩm, giá cả, trạng thái kho và nút đặt hàng.
-- [ ] Chia nhỏ task: 1. Fetch mock data chi tiết. 2. Code layout.
+- [ ] Đọc các file liên quan: `docs/09-frontend.md`, `client/src/app/catalog/page.js`, `client/src/lib/api.js`, route `GET /api/catalog/{id}` và tài liệu API/DTO liên quan.
+- [ ] Đọc hướng dẫn Next.js tương ứng trong `client/node_modules/next/dist/docs/` trước khi code, theo `client/AGENTS.md`.
+- [ ] Xác định phạm vi: tạo route `client/src/app/catalog/[id]/page.js`; chỉ sửa catalog list để điều hướng sang trang chi tiết; chưa gọi API tạo đơn trong task này.
+- [ ] Xác định contract dữ liệu UI: `id`, `name`, `category`, `price`, `isActive`, `image`, mô tả/bảo hành; dùng fallback khi API chưa trả các trường presentation-only.
+- [ ] Chia nhỏ task: (1) route + loading/not-found/error states; (2) layout thông tin sản phẩm; (3) quantity selector, tổng tiền và trạng thái hết hàng; (4) liên kết từ catalog list; (5) test và self-review.
 
 **2. Code**
-- [ ] Bước 2.1: ...
-- [ ] Bước 2.2: ...
+- [ ] Bước 2.1: Tạo route chi tiết sản phẩm, skeleton loading, empty/not-found state và error state có nút thử lại.
+- [ ] Bước 2.2: Hiển thị ảnh, danh mục, tên, mô tả, giá, bảo hành/giao hàng số và trạng thái kho.
+- [ ] Bước 2.3: Thêm quantity selector, tính tổng tiền chính xác và disable hành động mua khi hết hàng.
+- [ ] Bước 2.4: Cập nhật card catalog để click vào trang chi tiết mà không phá vỡ UI hiện có.
+- [ ] Bước 2.5: Chuẩn bị điểm tích hợp cho FE-03 (xác nhận đặt đơn), không tự trừ ví hoặc tạo order ở client.
 
 **3. Test**
-- [ ] Test hiển thị dữ liệu chính xác.
+- [ ] Test render dữ liệu chính xác, tổng tiền thay đổi theo số lượng và trạng thái hết hàng không thể mua.
+- [ ] Test product không tồn tại/lỗi tải dữ liệu có state thân thiện, không làm crash route.
+- [ ] Chạy toàn bộ test frontend phù hợp với cấu hình project; ghi kết quả [x/y pass].
 
 **4. Self-review (agent tự soát trước khi báo cáo)**
-- [ ] Tuân thủ Design System.
+- [ ] Tuân thủ Design System, responsive và dark mode.
+- [ ] Không còn mock-only logic làm thay đổi số dư/đơn hàng thật; không lộ dữ liệu nhạy cảm.
+- [ ] Kiểm tra navigation, loading cleanup và accessibility cơ bản cho các button/input.
 
 **5. Cập nhật tài liệu (nếu có ảnh hưởng)**
-- [ ] Cập nhật PROGRESS.md khi hoàn thành.
+- [ ] Cập nhật `PROGRESS.md` khi hoàn thành; nếu API contract thay đổi, cập nhật tài liệu API/frontend đúng file chính thức.
 
 **6. Done — chỉ tick khi 1-5 đã xong hết**
-- [ ] Di chuyển task xuống mục "Done".
+- [ ] Di chuyển task xuống mục "Done" và đưa FE-11 hoặc FE-02 vào Current focus theo trạng thái backend.
 
-**Bước tiếp theo cụ thể**: Lên thiết kế layout và chờ duyệt.
+**Bước tiếp theo cụ thể**: Đọc `docs/09-frontend.md`, kiểm tra API contract/catalog hiện có và lập kế hoạch route `catalog/[id]`.
 
 ---
 
@@ -105,12 +116,34 @@
 
 ## Backlog Frontend (chưa làm, thứ tự ưu tiên từ trên xuống)
 
-- [x] [S] Trang Chi tiết Đơn hàng (`orders/[id]`) — core flow, hiển thị thông tin tài khoản và xử lý PRICE_CHANGED.
-- [x] [M] Trang Quản lý Supplier Admin (`admin/suppliers`) — quản lý nguồn cung cấp.
-- [ ] [M] Trang Chi tiết Sản phẩm (`catalog/[id]`) — không gấp, làm sau.
+### Luồng MVP: Catalog → Đặt đơn → Nhận tài khoản
+
+- [ ] [M] **FE-01: Trang chi tiết sản phẩm** (`catalog/[id]`) — **Current focus**. Hiển thị tên/ảnh/danh mục/mô tả/giá/trạng thái kho, quantity selector, tổng tiền, loading/error/not-found; liên kết từ catalog; chưa tạo đơn hoặc tự trừ ví trong task này. Có thể dùng mock cùng contract trước khi `GET /api/catalog/{id}` sẵn sàng.
+- [ ] [S] **FE-11: Chuẩn hóa API client theo domain** — tách API Catalog/Order/Wallet/Supplier trên nền `apiFetch`; thống nhất xử lý response envelope, network error, 401/403/409/429/5xx; component không tự gọi `fetch` rải rác.
+- [ ] [S] **FE-02: Kết nối catalog với API thật** (`/catalog`) — thay `MOCK_PRODUCTS` bằng `GET /api/catalog`; map DTO sang UI, có retry/empty/error/image fallback, tìm kiếm theo tên và lọc còn hàng/hết hàng. **Blocked:** cần backend hoàn thành `GET /api/catalog`.
+- [ ] [M] **FE-03: Xác nhận và tạo đơn** — dialog/trang xác nhận sản phẩm, số lượng, đơn giá, tổng tiền và số dư; chống double-submit; gọi `POST /api/orders`; xử lý 200 success, 202 retry, 409 giá thay đổi và các lỗi supplier. Không optimistic-update số dư trước khi backend xác nhận.
+- [ ] [M] **FE-04: Xác nhận giá mới** — tại trang chi tiết đơn hoặc dialog, hiển thị giá cũ/mới/chênh lệch; cho phép đồng ý giá mới hoặc hủy; refresh trạng thái đơn. **Blocked:** cần API contract backend cho thao tác xác nhận/hủy khi `PRICE_CHANGED`.
+- [ ] [S] **FE-05: Kết nối danh sách đơn với API** (`/orders`) — thay `MOCK_ORDERS` bằng `GET /api/orders`; tính lại số liệu tổng quan, lọc theo status, có empty/error states và điều hướng theo ID thật. **Blocked:** cần backend hoàn thành `GET /api/orders`.
+- [ ] [M] **FE-06: Kết nối chi tiết đơn + polling retry** (`/orders/[id]`) — dùng `GET /api/orders/{id}`; hiển thị trạng thái, giá/số lượng/tổng, account đã giao; polling 5–10 giây cho `PROCESSING_RETRY` và cleanup khi rời trang; chỉ hiển thị/copy credentials khi đơn completed. **Blocked:** cần backend hoàn thành `GET /api/orders/{id}`.
+
+### Ví điện tử và thanh toán
+
+- [ ] [S] **FE-12: Đồng bộ trạng thái mua hàng** — rà soát `useStore`; bỏ logic demo tự trừ ví, chỉ cập nhật sau response backend/refetch thành công; chống race condition và double-click.
+- [ ] [S] **FE-07: Kết nối số dư ví** (`/wallet`) — thay `MOCK_WALLET` bằng `GET /api/wallet`, hỗ trợ loading/error/retry/refresh và đồng bộ số dư với luồng mua. **Blocked:** `GET /api/wallet` và mô hình wallet chưa chốt.
+- [ ] [M] **FE-08: Lịch sử giao dịch ví** — thay `MOCK_TRANSACTIONS`, có phân trang/xem thêm, filter loại giao dịch, empty/error states, hiển thị tiền và thời gian Việt Nam. **Blocked:** cần schema/service/API wallet transaction.
+- [ ] [L] **FE-09: Nạp tiền và liên kết thanh toán** — trước khi code phải tách thành: chọn payment gateway → tạo yêu cầu nạp → QR/redirect/status page → backend webhook → refresh số dư. **Blocked:** Q-005 và quyết định payment gateway.
+
+### Admin, chất lượng và các task bị block
+
+- [ ] [M] **FE-10: Kết nối Supplier Admin với API** (`/admin/suppliers`) — thay mock bằng `GET /api/admin/suppliers`, kết nối health check/kill switch khi API có sẵn, xác nhận thao tác phá hủy, không lộ API key/secret/signature. **Blocked:** cần API admin thao tác thật và authentication/authorization.
+- [ ] [S] **FE-13: Chuẩn hóa loading, empty và error states** — tạo component tái sử dụng và áp dụng cho Catalog, Orders, Order Detail, Wallet, Supplier Admin; không để trang crash hoặc chỉ log console khi API lỗi.
+- [ ] [M] **FE-14: Test frontend luồng cốt lõi** — test catalog (loading/data/error/empty), hết hàng/thiếu số dư, single submit, 202 retry, 409 price changed và bảo mật hiển thị delivered account. Chạy được độc lập bằng mock API.
+- [x] [S] **Đã hoàn thành: Trang chi tiết đơn hàng** (`orders/[id]`) — UI core flow, hiển thị thông tin tài khoản và xử lý `PRICE_CHANGED`; còn cần FE-06 để kết nối API thật.
+- [x] [M] **Đã hoàn thành: Trang quản lý Supplier Admin** (`admin/suppliers`) — UI quản lý nguồn cung; còn cần FE-10 để kết nối API/auth thật.
 
 **Các trang đang bị block (Chờ Backend / Quyết định):**
-- [ ] Trang Đăng nhập / Hồ sơ cá nhân (Auth/Profile) — Blocked bởi Q-005 và Backend schema users.
+
+- [ ] Trang Đăng nhập / Hồ sơ cá nhân (Auth/Profile) — Blocked bởi Q-005 và backend schema `users`.
 - [ ] Trang Admin Pricing — Blocked bởi Q-003.
 - [ ] Trang Order Reconciliation (Đối soát) — Blocked bởi task Backend tương ứng.
 
