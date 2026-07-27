@@ -11,6 +11,12 @@
 
 Các cột có comment `-- Logical FK` là tham chiếu logic, KHÔNG phải FK thực sự.
 
+### Quản lý schema hiện tại
+
+- File này là nguồn sự thật cho cấu trúc bảng, cột, constraint và index của MDStore.
+- Project **không dùng Flyway migration**. Hibernate đồng bộ schema theo JPA entity qua `spring.jpa.hibernate.ddl-auto=update` trong `Server/src/main/resources/application.yml`.
+- Khi thay đổi schema: cập nhật file này trước, rồi đồng bộ entity/repository/test liên quan. Không tạo migration script hoặc `FOREIGN KEY`.
+
 ---
 
 ## ERD
@@ -46,11 +52,12 @@ erDiagram
 
     supplier_products {
         bigint id PK
-        bigint supplier_id "Logical FK → suppliers.id"
+        varchar(50) supplier_code "Logical reference → suppliers.code"
         bigint product_id "Logical FK → products.id"
         varchar(100) external_code "mã SP bên hệ thống supplier (VD: VS_NORDVPN_1M)"
         numeric(15_2) supply_price "giá sỉ hiện tại"
         boolean is_active
+        varchar(255) flash_sale_id "snapshot chương trình flash sale của supplier"
         timestamp created_at
         timestamp updated_at
     }
@@ -135,13 +142,15 @@ CREATE TABLE products (
 -- 3. Ánh xạ sản phẩm ↔ nhà cung cấp
 CREATE TABLE supplier_products (
     id            BIGSERIAL PRIMARY KEY,
-    supplier_id   BIGINT         NOT NULL, -- Logical FK → suppliers.id
+    supplier_code VARCHAR(50)    NOT NULL, -- Logical reference → suppliers.code
     product_id    BIGINT         NOT NULL, -- Logical FK → products.id
     external_code VARCHAR(100)   NOT NULL, -- Mã SP bên VietShare (VD: VS_NORDVPN_1M)
     supply_price  NUMERIC(15, 2) NOT NULL,
     is_active     BOOLEAN        DEFAULT TRUE,
-    created_at    TIMESTAMP      DEFAULT CURRENT_TIMESTAMP,
-    updated_at    TIMESTAMP      DEFAULT CURRENT_TIMESTAMP
+    flash_sale_id VARCHAR(255),
+    created_at    TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at    TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_supplier_products_supplier_external UNIQUE (supplier_code, external_code)
 );
 
 -- 4. Đơn hàng
@@ -200,9 +209,11 @@ CREATE UNIQUE INDEX idx_orders_idempotency
     ON orders (idempotency_key)
     WHERE idempotency_key IS NOT NULL;
 
--- Tra cứu sản phẩm theo nhà cung cấp
-CREATE INDEX idx_supplier_products_sid_pid
-    ON supplier_products (supplier_id, product_id);
+-- `uk_supplier_products_supplier_external` tạo unique index cho catalog mapping.
+
+-- Route order tới nguồn active có giá nhập thấp nhất
+CREATE INDEX idx_supplier_products_product_active_price
+    ON supplier_products (product_id, is_active, supply_price);
 
 -- Claim các đơn retry đến hạn
 CREATE INDEX idx_orders_retry_due

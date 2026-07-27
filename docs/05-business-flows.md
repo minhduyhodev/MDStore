@@ -166,7 +166,7 @@ Cập nhật `supplier_products.supply_price` và `is_active` theo dữ liệu t
    - Không có Idempotency-Key (GET request, idempotent tự nhiên)
 
 3. Với mỗi item trong response:
-   a. Tìm supplier_products WHERE external_code = item.id AND supplier_id = VietShare_id
+   a. Tìm supplier_products WHERE external_code = item.id AND supplier_code = mã supplier (VD: `VIETSHARE`)
    b. Nếu tìm thấy:
       - UPDATE supply_price = item.price
       - UPDATE is_active = (item.is_active AND item.stock > 0)

@@ -58,7 +58,7 @@ export default function ProductDetailPage({ params }) {
 
   if (loading) {
     return (
-      <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/50 dark:bg-slate-900/20">
+      <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/50 ">
         <Header title="Chi tiết Sản phẩm" />
         <main className="flex-1 p-8 flex justify-center items-center">
           <div className="animate-pulse flex flex-col items-center gap-4">
@@ -72,15 +72,15 @@ export default function ProductDetailPage({ params }) {
 
   if (error) {
     return (
-      <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/50 dark:bg-slate-900/20">
+      <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/50 ">
         <Header title="Lỗi tải dữ liệu" />
         <main className="flex-1 p-8 flex flex-col items-center justify-center">
           <AlertCircle size={48} className="text-rose-500 mb-4 opacity-80" />
-          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">Đã xảy ra lỗi</h2>
-          <p className="text-slate-500 dark:text-slate-400 mb-6">{error}</p>
+          <h2 className="text-xl font-bold text-slate-900  mb-2">Đã xảy ra lỗi</h2>
+          <p className="text-slate-500  mb-6">{error}</p>
           <button 
             onClick={() => window.location.reload()}
-            className="px-6 py-2.5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors font-medium"
+            className="px-6 py-2.5 bg-slate-900  text-white  rounded-lg hover:bg-slate-800  transition-colors font-medium"
           >
             Thử lại
           </button>
@@ -91,12 +91,12 @@ export default function ProductDetailPage({ params }) {
 
   if (!product) {
     return (
-      <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/50 dark:bg-slate-900/20">
+      <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/50 ">
         <Header title="Không tìm thấy" />
         <main className="flex-1 p-8 flex flex-col items-center justify-center">
           <AlertCircle size={48} className="text-slate-400 mb-4 opacity-50" />
-          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">Sản phẩm không tồn tại</h2>
-          <p className="text-slate-500 dark:text-slate-400 mb-6">Sản phẩm bạn đang tìm kiếm có thể đã bị xóa hoặc không còn bán.</p>
+          <h2 className="text-xl font-bold text-slate-900  mb-2">Sản phẩm không tồn tại</h2>
+          <p className="text-slate-500  mb-6">Sản phẩm bạn đang tìm kiếm có thể đã bị xóa hoặc không còn bán.</p>
           <Link 
             href="/catalog"
             className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
@@ -111,7 +111,7 @@ export default function ProductDetailPage({ params }) {
   const totalPrice = product.price * quantity;
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/50 dark:bg-slate-900/20">
+    <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/50 ">
       <Header title="Chi tiết Sản phẩm" />
       
       <main className="flex-1 overflow-y-auto p-4 sm:p-8">
@@ -121,7 +121,7 @@ export default function ProductDetailPage({ params }) {
           <div className="mb-6 flex items-center">
             <Link 
               href="/catalog" 
-              className="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+              className="flex items-center gap-2 text-sm font-medium text-slate-500  hover:text-slate-900  transition-colors"
             >
               <ArrowLeft size={16} /> Quay lại cửa hàng
             </Link>
@@ -134,8 +134,8 @@ export default function ProductDetailPage({ params }) {
           >
             {/* Left: Image */}
             <div className="md:w-5/12 shrink-0">
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm relative">
-                <div className="aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900">
+              <div className="bg-white  rounded-2xl border border-slate-200  overflow-hidden shadow-sm relative">
+                <div className="aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200  ">
                   <img src={product.image} alt={product.name} className="w-full h-full object-cover opacity-90" />
                 </div>
                 {/* Category Badge on Image */}
@@ -150,58 +150,58 @@ export default function ProductDetailPage({ params }) {
             <div className="flex-1 flex flex-col">
               <div className="mb-2">
                 {product.isActive ? (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider border border-emerald-200 dark:border-emerald-500/20">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50  text-emerald-700  text-xs font-bold uppercase tracking-wider border border-emerald-200 ">
                     <CheckCircle2 size={14} /> Còn hàng
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 text-xs font-bold uppercase tracking-wider border border-rose-200 dark:border-rose-500/20">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-rose-50  text-rose-700  text-xs font-bold uppercase tracking-wider border border-rose-200 ">
                     <XCircle size={14} /> Hết hàng
                   </span>
                 )}
               </div>
               
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-4">{product.name}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900  mb-4">{product.name}</h1>
               
-              <div className="text-3xl font-black text-slate-900 dark:text-white mb-6 pb-6 border-b border-slate-200 dark:border-slate-800">
+              <div className="text-3xl font-black text-slate-900  mb-6 pb-6 border-b border-slate-200 ">
                 {product.price.toLocaleString('vi-VN')}₫
               </div>
 
               <div className="space-y-6 mb-8">
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-2">Mô tả sản phẩm</h3>
-                  <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
+                  <h3 className="text-sm font-bold text-slate-900  mb-2">Mô tả sản phẩm</h3>
+                  <p className="text-slate-600  leading-relaxed text-sm">
                     {product.description || 'Gói tài khoản tự động gia hạn, bảo hành trọn thời gian sử dụng.'}
                   </p>
                 </div>
                 
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-2">Chính sách bảo hành</h3>
-                  <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
+                  <h3 className="text-sm font-bold text-slate-900  mb-2">Chính sách bảo hành</h3>
+                  <p className="text-slate-600  leading-relaxed text-sm">
                     {product.warranty || 'Bảo hành 1 đổi 1 trong thời gian sử dụng.'}
                   </p>
                 </div>
               </div>
 
               {/* Purchase Action Box */}
-              <div className="mt-auto bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+              <div className="mt-auto bg-white  rounded-xl border border-slate-200  p-5 shadow-sm">
                 <div className="flex flex-col sm:flex-row gap-4 items-end sm:items-center justify-between mb-5">
                   <div>
-                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Số lượng</label>
-                    <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden w-32">
+                    <label className="block text-sm font-bold text-slate-700  mb-2">Số lượng</label>
+                    <div className="flex items-center border border-slate-200  rounded-lg overflow-hidden w-32">
                       <button 
                         onClick={handleDecrease}
                         disabled={quantity <= 1 || !product.isActive}
-                        className="w-10 h-10 flex items-center justify-center bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 text-slate-600 dark:text-slate-400 transition-colors"
+                        className="w-10 h-10 flex items-center justify-center bg-slate-50  hover:bg-slate-100  disabled:opacity-50 text-slate-600  transition-colors"
                       >
                         <Minus size={16} />
                       </button>
-                      <div className="flex-1 text-center font-bold text-slate-900 dark:text-slate-100 border-x border-slate-200 dark:border-slate-700 h-10 flex items-center justify-center bg-white dark:bg-slate-900">
+                      <div className="flex-1 text-center font-bold text-slate-900  border-x border-slate-200  h-10 flex items-center justify-center bg-white ">
                         {quantity}
                       </div>
                       <button 
                         onClick={handleIncrease}
                         disabled={quantity >= 10 || !product.isActive}
-                        className="w-10 h-10 flex items-center justify-center bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 text-slate-600 dark:text-slate-400 transition-colors"
+                        className="w-10 h-10 flex items-center justify-center bg-slate-50  hover:bg-slate-100  disabled:opacity-50 text-slate-600  transition-colors"
                       >
                         <Plus size={16} />
                       </button>
@@ -209,8 +209,8 @@ export default function ProductDetailPage({ params }) {
                   </div>
                   
                   <div className="text-right">
-                    <div className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Tổng cộng</div>
-                    <div className="text-2xl font-black text-emerald-600 dark:text-emerald-500">
+                    <div className="text-sm font-medium text-slate-500  mb-1">Tổng cộng</div>
+                    <div className="text-2xl font-black text-emerald-600 ">
                       {totalPrice.toLocaleString('vi-VN')}₫
                     </div>
                   </div>
@@ -223,7 +223,7 @@ export default function ProductDetailPage({ params }) {
                     w-full py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all
                     ${product.isActive 
                       ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 active:scale-[0.98]' 
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                      : 'bg-slate-100  text-slate-400  cursor-not-allowed'
                     }
                   `}
                 >

@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Package, ShoppingBag, Wallet, Box, Server } from 'lucide-react';
+import { useStore } from '@/store/useStore';
+import { useEffect, useState } from 'react';
 
 const NAV_ITEMS = [
   { href: '/catalog', label: 'Sản phẩm', icon: Package },
@@ -16,6 +18,13 @@ const ADMIN_ITEMS = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { user } = useStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
 
   const renderNavItems = (items) => {
     return items.map((item) => {
@@ -61,21 +70,22 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Navigation - Main */}
-      <nav className="flex flex-col gap-1.5">
-        <div className="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-          Giao dịch
-        </div>
-        {renderNavItems(NAV_ITEMS)}
-      </nav>
-
-      {/* Navigation - Admin */}
-      <nav className="flex flex-col gap-1.5 mt-4">
-        <div className="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-          Quản trị hệ thống
-        </div>
-        {renderNavItems(ADMIN_ITEMS)}
-      </nav>
+      {/* Render conditional navigation based on role */}
+      {mounted && user?.role === 'ADMIN' ? (
+        <nav className="flex flex-col gap-1.5">
+          <div className="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+            Quản trị hệ thống
+          </div>
+          {renderNavItems(ADMIN_ITEMS)}
+        </nav>
+      ) : (
+        <nav className="flex flex-col gap-1.5">
+          <div className="px-4 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+            Giao dịch
+          </div>
+          {renderNavItems(NAV_ITEMS)}
+        </nav>
+      )}
 
       {/* Footer Info */}
       <div className="mt-auto px-4 py-4 rounded-2xl bg-slate-50 border border-slate-200">

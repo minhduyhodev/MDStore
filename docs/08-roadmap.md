@@ -41,7 +41,7 @@
 - [ ] REST API cho Frontend (Authentication, Product List, Order History)
 - [ ] CatalogSyncService (job đồng bộ 10-30s/lần)
 - [ ] OrderOrchestrationService (chọn nguồn, gọi connector, xử lý PRICE_CHANGED)
-- [ ] Thiết kế bảng `orders`, `supplier_products` migration (Flyway)
+- [ ] Rà soát và đồng bộ DDL/JPA schema cho `orders`, `supplier_products` (Hibernate `ddl-auto=update`, không dùng Flyway)
 
 ---
 

@@ -66,7 +66,7 @@ export default function CatalogPage() {
         <div className="max-w-7xl mx-auto space-y-8">
           
           {/* Toolbar */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800/60 backdrop-blur-md">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/50  p-4 rounded-2xl border border-slate-200  backdrop-blur-md">
             <div className="relative w-full sm:w-96">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search size={18} className="text-slate-400" />
@@ -74,12 +74,12 @@ export default function CatalogPage() {
               <input 
                 type="text" 
                 placeholder="Tìm kiếm sản phẩm..." 
-                className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm"
+                className="w-full pl-10 pr-4 py-2.5 bg-white  border border-slate-200  rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm"
               />
             </div>
             
             <div className="flex gap-3 w-full sm:w-auto">
-              <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900 text-sm font-medium transition-colors">
+              <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white  border border-slate-200  rounded-xl hover:bg-slate-50  text-sm font-medium transition-colors">
                 <Filter size={16} />
                 Lọc
               </button>
@@ -90,7 +90,7 @@ export default function CatalogPage() {
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="animate-pulse bg-white dark:bg-slate-900 rounded-2xl h-80 border border-slate-100 dark:border-slate-800"></div>
+                <div key={i} className="animate-pulse bg-white  rounded-2xl h-80 border border-slate-100 "></div>
               ))}
             </div>
           ) : error ? (
@@ -109,11 +109,11 @@ export default function CatalogPage() {
                 <motion.div 
                   key={product.id} 
                   variants={itemVariants}
-                  className="group relative bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-200/60 dark:border-slate-800/60 shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 hover:-translate-y-1 transition-all duration-300 flex flex-col"
+                  className="group relative bg-white  rounded-2xl overflow-hidden border border-slate-200/60  shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 hover:-translate-y-1 transition-all duration-300 flex flex-col"
                 >
                   <Link href={`/catalog/${product.id}`} className="block">
                     {/* Image Placeholder with Gradient */}
-                    <div className="relative h-40 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 overflow-hidden">
+                    <div className="relative h-40 bg-gradient-to-br from-slate-100 to-slate-200   overflow-hidden">
                       <img src={product.image} alt={product.name} className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
                       
                       {/* Category Badge */}
@@ -140,18 +140,18 @@ export default function CatalogPage() {
                   {/* Info */}
                   <div className="p-5 flex-1 flex flex-col">
                     <Link href={`/catalog/${product.id}`} className="block">
-                      <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                      <h3 className="text-lg font-bold text-slate-800  mb-1 group-hover:text-indigo-600  transition-colors">
                         {product.name}
                       </h3>
-                      <div className="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">
+                      <div className="text-sm text-slate-500  mb-4 line-clamp-2">
                         Gói tài khoản tự động gia hạn, bảo hành trọn thời gian sử dụng.
                       </div>
                     </Link>
                     
-                    <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <div className="mt-auto pt-4 border-t border-slate-100  flex items-center justify-between">
                       <div className="flex flex-col">
                         <span className="text-xs text-slate-400 font-medium">Giá bán</span>
-                        <span className="text-lg font-black text-slate-900 dark:text-white bg-clip-text">
+                        <span className="text-lg font-black text-slate-900  bg-clip-text">
                           {product.price.toLocaleString('vi-VN')}₫
                         </span>
                       </div>
@@ -162,7 +162,7 @@ export default function CatalogPage() {
                           flex items-center justify-center p-3 rounded-xl transition-all
                           ${product.isActive 
                             ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:scale-105 active:scale-95' 
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
+                            : 'bg-slate-100  text-slate-400 cursor-not-allowed'
                           }
                         `}
                       >

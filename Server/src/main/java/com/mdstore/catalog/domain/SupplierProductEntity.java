@@ -5,12 +5,21 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 @Entity
-@Table(name = "supplier_products")
+@Table(
+        name = "supplier_products",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"supplier_code", "external_code"}),
+        indexes = @Index(name = "idx_supplier_products_product_active_price", columnList = "product_id, is_active, supply_price")
+)
 public class SupplierProductEntity {
 
     @Id
@@ -35,6 +44,12 @@ public class SupplierProductEntity {
     @Column(name = "flash_sale_id")
     private String flashSaleId;
 
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
     public SupplierProductEntity() {
     }
 
@@ -45,6 +60,18 @@ public class SupplierProductEntity {
         this.supplyPrice = supplyPrice;
         this.isActive = isActive;
         this.flashSaleId = flashSaleId;
+    }
+
+    @PrePersist
+    public void onCreate() {
+        Instant now = Instant.now();
+        createdAt = now;
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        updatedAt = Instant.now();
     }
 
     public Long getId() {
@@ -85,5 +112,13 @@ public class SupplierProductEntity {
 
     public void setFlashSaleId(String flashSaleId) {
         this.flashSaleId = flashSaleId;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
     }
 }

@@ -191,7 +191,7 @@ Nhìn vào cây thư mục thật, rõ ràng còn thiếu nhiều:
 | `CatalogSyncService` | Backlog [M] | Gọi `fetchCatalog()` mỗi 30 giây, lưu Redis |
 | `OrderOrchestrationService` | Backlog [M] | Gọi `placeOrder()`, xử lý PRICE_CHANGED, retry |
 | REST Controller (API endpoint) | Chưa có trong Backlog | Cần thêm để frontend gọi được |
-| DB migration (Flyway) | Backlog [S] L.4 | Schema SQL cho `orders`, `supplier_products`... |
+| Đồng bộ DDL/JPA schema | Backlog [S] L.4 | `docs/03-db-schema.md` là nguồn sự thật; Hibernate `ddl-auto=update`, không dùng Flyway |
 
 ---
 

@@ -12,7 +12,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update # Flyway quản lý schema, không để Hibernate tự tạo
+      ddl-auto: update # Hibernate cập nhật schema theo JPA entity; DDL chuẩn được ghi tại docs/03-db-schema.md
     open-in-view: false
     properties:
       hibernate:
@@ -22,10 +22,6 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
-
-  flyway:
-    enabled: true
-    locations: classpath:db/migration
 
 # VietShare supplier config — xem docs/04-suppliers/vietshare.md
 vietshare:

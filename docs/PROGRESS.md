@@ -56,35 +56,37 @@
 
 ---
 
-### Task: [S] FE-13 — Chuẩn hóa loading, empty và error states
+### Task: [S] L.4 — Loại bỏ Flyway, đồng bộ DDL/JPA schema
 
-**Trạng thái**: Plan — bước 1/6
+**Trạng thái**: Done — bước 6/6
 
 **1. Plan (phân tích + lên kế hoạch)**
-- [ ] Đọc các file liên quan: UI components hiện tại.
-- [ ] Xác định phạm vi: Tạo các component tái sử dụng (LoadingState, ErrorState, EmptyState).
-- [ ] Chia nhỏ task: (1) tạo các base component, (2) thay thế vào Catalog, Orders, Wallet, Supplier Admin.
+- [x] Đọc `docs/02-decisions.md`, `docs/03-db-schema.md`, entity/repository hiện có, `Server/pom.xml` và `Server/src/main/resources/application.yml`.
+- [x] Xác nhận project chưa có migration file nhưng vẫn khai báo `flyway-core` và bật `spring.flyway`; JPA thực tế dùng `ddl-auto=update`.
+- [x] Xác định phạm vi: bỏ Flyway dependency/config/documentation, giữ Hibernate `ddl-auto=update`; không đổi DDL, entity, API hay thêm foreign key.
 
 **2. Code**
-- [ ] Bước 2.1: Tạo `LoadingState.js`, `ErrorState.js`, `EmptyState.js` trong `src/components/ui/`.
-- [ ] Bước 2.2: Thay thế logic hardcode loading/error ở trang Catalog và Catalog Detail.
-- [ ] Bước 2.3: Thay thế ở trang Orders, Wallet, Admin Suppliers.
+- [x] Bước 2.1: Xóa `flyway-core` khỏi Maven dependency và block `spring.flyway`.
+- [x] Bước 2.2: Đồng bộ `application.yml` để ghi rõ Hibernate quản lý schema theo JPA entity.
+- [x] Bước 2.3: Đồng bộ schema docs, roadmap và backend structure docs để không còn hướng dẫn Flyway.
 
 **3. Test**
-- [ ] Test lại các state trên các trang (bằng mock).
-- [ ] Chạy lint/tests.
+- [x] Chạy `mvn test` trong `Server/`: 53/53 pass, `BUILD SUCCESS`.
+- [x] Xác nhận `mvn dependency:tree -Dincludes=org.flywaydb` không trả dependency Flyway; các tham chiếu còn lại chỉ ghi rõ quyết định không dùng Flyway hoặc là lịch sử task.
 
 **4. Self-review (agent tự soát trước khi báo cáo)**
-- [ ] Đảm bảo UI nhất quán, chuẩn Design System.
-- [ ] Không còn code crash trang khi lỗi.
+- [x] Rà soát diff: không tạo migration, không đổi schema/API, không thêm FK hoặc secret.
+- [x] Xác nhận các thay đổi/untracked frontend và file `target/` là ngoài phạm vi task; không sửa hoặc xóa chúng.
 
 **5. Cập nhật tài liệu (nếu có ảnh hưởng)**
-- [ ] Không cần.
+- [x] Đã cập nhật `docs/03-db-schema.md`, `docs/08-roadmap.md`, `docs/10-backend-structure-explained.md`.
+- [x] Đã cập nhật `PROGRESS.md`.
 
 **6. Done — chỉ tick khi 1-5 đã xong hết**
-- [ ] Di chuyển task xuống mục "Done".
+- [x] Hoàn tất loại bỏ Flyway.
+- [x] Task tiếp theo: Catalog Query API (`GET /api/catalog`, `GET /api/catalog/{id}`) để unblock FE-02.
 
-**Bước tiếp theo cụ thể**: Bắt đầu tạo thư mục `src/components/ui` và các base components.
+**Bước tiếp theo cụ thể**: Lập kế hoạch Catalog Query API dựa trên dữ liệu `supplier_products` đã đồng bộ.
 
 ---
 
@@ -95,12 +97,11 @@
 > - `[M]` = cần vài vòng Plan→Test lặp lại
 > - `[L]` = quá to, **PHẢI tách nhỏ hơn nữa trước khi bắt đầu**, không được giữ nguyên
 
-- [ ] [S] L.1: Confirm schema `supplier_products` (đã xong một phần, cần review thêm field)
-- [ ] [M] L.2: Thiết kế schema `orders` ✅ (Đã hoàn thành cơ bản qua Routing Logic)
+- [x] [S] L.1: Confirm schema `supplier_products` — thống nhất dùng `supplier_code`, bổ sung `flash_sale_id`, audit timestamps, unique mapping và index routing; toàn bộ 53/53 Maven tests pass.
+- [x] [M] L.2: Thiết kế schema `orders` — đã hoàn thành cơ bản qua Routing Logic.
 - [ ] [S] WalletService: Đọc balance qua GET /v1/account từ VietShare (Task mới bổ sung)
 - [ ] [M] OrderReconciliationService: Đối soát đơn qua GET /v1/orders từ VietShare (Task mới bổ sung)
-- [ ] [S] L.4: Viết DDL hoàn chỉnh + cập nhật `03-db-schema.md` (làm sau L.1 và L.2 xong)
-- [ ] [S] Viết Flyway migration script từ DDL đã thiết kế ở L.4
+- [x] [S] L.4: Loại bỏ Flyway, đồng bộ DDL/JPA schema — dùng Hibernate `ddl-auto=update`; không tạo migration script.
 - [ ] [M] L.3: Thiết kế schema `users` + balance ← **block bởi Q-005** (ví nội bộ vs payment gateway chưa quyết định)
 
 
@@ -137,9 +138,12 @@
 - [x] [S] **Đã hoàn thành: Trang chi tiết đơn hàng** (`orders/[id]`) — UI core flow, hiển thị thông tin tài khoản và xử lý `PRICE_CHANGED`; còn cần FE-06 để kết nối API thật.
 - [x] [M] **Đã hoàn thành: Trang quản lý Supplier Admin** (`admin/suppliers`) — UI quản lý nguồn cung; còn cần FE-10 để kết nối API/auth thật.
 
+### Xác thực & Phân quyền (Mock)
+
+- [x] [M] **Đã hoàn thành: Thiết kế Mock Auth & Phân quyền** (FE-20) — Xây dựng trang Đăng nhập giả lập, lưu `role` (ADMIN/USER) vào Zustand. Tạo Route Guard để bảo vệ các trang `/admin/*`. Hoàn thiện UI trang Hồ sơ cá nhân (Profile) bằng mock data. (Gỡ block cho phần Auth).
+
 **Các trang đang bị block (Chờ Backend / Quyết định):**
 
-- [ ] Trang Đăng nhập / Hồ sơ cá nhân (Auth/Profile) — Blocked bởi Q-005 và backend schema `users`.
 - [ ] Trang Admin Pricing — Blocked bởi Q-003.
 - [ ] Trang Order Reconciliation (Đối soát) — Blocked bởi task Backend tương ứng.
 
@@ -147,6 +151,9 @@
 
 ## Done (chỉ 1 dòng/task, chi tiết xem git log)
 
+- [x] 2026-07-27 — Hoàn thiện L.4: Loại bỏ Flyway dependency/config; chọn Hibernate `ddl-auto=update` để đồng bộ JPA schema; cập nhật schema docs/roadmap/backend structure; 53/53 Maven tests pass.
+- [x] 2026-07-27 — Hoàn thiện L.1: Chốt schema `supplier_products` dùng `supplier_code`, bổ sung `flash_sale_id`, audit timestamps, unique mapping/index route order và đồng bộ Flow 3; toàn bộ 53/53 Maven tests pass.
+- [x] 2026-07-27 — Hoàn thiện FE-20: Thiết kế Mock Auth & Phân quyền (Tạo trang Login, Profile, AdminGuard, persist store).
 - [x] 2026-07-27 — Hoàn thiện FE-11: Chuẩn hóa API client theo domain (Tạo thư mục services, cải tiến xử lý lỗi apiFetch).
 - [x] 2026-07-27 — Hoàn thiện FE-01: Trang chi tiết sản phẩm (`catalog/[id]`) với layout responsive, quantity selector, mock data và các state tải dữ liệu. Cập nhật list catalog để điều hướng.
 - [x] 2026-07-26 — Hoàn thiện UI Trang Quản lý Supplier Admin (admin/suppliers): bảng mật độ cao, kill switch có xác nhận modal, health check có loading, không lộ API key. Cập nhật Sidebar sang theme Emerald.

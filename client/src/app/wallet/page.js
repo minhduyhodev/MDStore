@@ -42,8 +42,8 @@ export default function WalletPage() {
           
           {loading ? (
             <div className="flex flex-col lg:flex-row gap-8 animate-pulse">
-              <div className="w-full lg:w-96 h-56 bg-slate-200 dark:bg-slate-800 rounded-3xl"></div>
-              <div className="flex-1 h-96 bg-slate-200 dark:bg-slate-800 rounded-3xl"></div>
+              <div className="w-full lg:w-96 h-56 bg-slate-200  rounded-3xl"></div>
+              <div className="flex-1 h-96 bg-slate-200  rounded-3xl"></div>
             </div>
           ) : (
             <motion.div 
@@ -91,11 +91,11 @@ export default function WalletPage() {
 
                 {/* Quick Actions */}
                 <div className="grid grid-cols-2 gap-4">
-                  <button className="flex flex-col items-center justify-center p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors font-semibold">
+                  <button className="flex flex-col items-center justify-center p-4 rounded-2xl bg-indigo-50  text-indigo-600  hover:bg-indigo-100  transition-colors font-semibold">
                     <Plus size={24} className="mb-2" />
                     Nạp tiền
                   </button>
-                  <button className="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors font-semibold">
+                  <button className="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-50  text-slate-700  hover:bg-slate-100  transition-colors font-semibold">
                     <CreditCard size={24} className="mb-2 text-slate-500" />
                     Liên kết thẻ
                   </button>
@@ -103,37 +103,37 @@ export default function WalletPage() {
               </div>
 
               {/* Transaction History */}
-              <div className="flex-1 w-full bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-                  <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+              <div className="flex-1 w-full bg-white  rounded-3xl border border-slate-200  shadow-sm overflow-hidden">
+                <div className="px-6 py-5 border-b border-slate-100  flex justify-between items-center">
+                  <h2 className="text-lg font-bold text-slate-800  flex items-center gap-2">
                     <Clock size={20} className="text-indigo-500" />
                     Lịch sử giao dịch
                   </h2>
-                  <button className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline">
+                  <button className="text-sm font-medium text-indigo-600  hover:underline">
                     Xem tất cả
                   </button>
                 </div>
                 
-                <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                <div className="divide-y divide-slate-100 ">
                   {transactions.map((tx) => {
                     const isDeposit = tx.amount > 0;
                     return (
-                      <div key={tx.id} className="flex items-center justify-between p-6 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
+                      <div key={tx.id} className="flex items-center justify-between p-6 hover:bg-slate-50/50  transition-colors group">
                         <div className="flex items-center gap-4">
-                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${isDeposit ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400'}`}>
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${isDeposit ? 'bg-emerald-100  text-emerald-600 ' : 'bg-rose-100  text-rose-600 '}`}>
                             {isDeposit ? <ArrowUpRight size={20} strokeWidth={2.5} /> : <ArrowDownRight size={20} strokeWidth={2.5} />}
                           </div>
                           <div>
-                            <div className="font-semibold text-slate-800 dark:text-slate-200 mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                            <div className="font-semibold text-slate-800  mb-1 group-hover:text-indigo-600  transition-colors">
                               {tx.description}
                             </div>
-                            <div className="text-sm text-slate-500 dark:text-slate-400">
+                            <div className="text-sm text-slate-500 ">
                               {new Date(tx.createdAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                             </div>
                           </div>
                         </div>
                         
-                        <div className={`text-lg font-bold ${isDeposit ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white'}`}>
+                        <div className={`text-lg font-bold ${isDeposit ? 'text-emerald-600 ' : 'text-slate-900 '}`}>
                           {isDeposit ? '+' : ''}{tx.amount.toLocaleString('vi-VN')}₫
                         </div>
                       </div>
