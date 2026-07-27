@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Search, Filter, ShoppingCart, Tag, CheckCircle2, XCircle } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 const MOCK_PRODUCTS = [
   { id: 'p1', name: 'Netflix 1 tháng',  category: 'Streaming', price: 85000,  isActive: true,  image: 'https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=500&q=80' },
@@ -110,38 +111,42 @@ export default function CatalogPage() {
                   variants={itemVariants}
                   className="group relative bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-200/60 dark:border-slate-800/60 shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 hover:-translate-y-1 transition-all duration-300 flex flex-col"
                 >
-                  {/* Image Placeholder with Gradient */}
-                  <div className="relative h-40 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 overflow-hidden">
-                    <img src={product.image} alt={product.name} className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
-                    
-                    {/* Category Badge */}
-                    <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-black/40 backdrop-blur-md text-white text-xs font-medium flex items-center gap-1.5">
-                      <Tag size={12} />
-                      {product.category}
-                    </div>
+                  <Link href={`/catalog/${product.id}`} className="block">
+                    {/* Image Placeholder with Gradient */}
+                    <div className="relative h-40 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 overflow-hidden">
+                      <img src={product.image} alt={product.name} className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
+                      
+                      {/* Category Badge */}
+                      <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-black/40 backdrop-blur-md text-white text-xs font-medium flex items-center gap-1.5">
+                        <Tag size={12} />
+                        {product.category}
+                      </div>
 
-                    {/* Status Badge */}
-                    <div className="absolute top-3 right-3">
-                      {product.isActive ? (
-                        <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-emerald-500/90 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm">
-                          <CheckCircle2 size={12} /> Còn hàng
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-rose-500/90 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm">
-                          <XCircle size={12} /> Hết hàng
-                        </span>
-                      )}
+                      {/* Status Badge */}
+                      <div className="absolute top-3 right-3">
+                        {product.isActive ? (
+                          <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-emerald-500/90 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm">
+                            <CheckCircle2 size={12} /> Còn hàng
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-rose-500/90 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm">
+                            <XCircle size={12} /> Hết hàng
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  </Link>
 
                   {/* Info */}
                   <div className="p-5 flex-1 flex flex-col">
-                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                      {product.name}
-                    </h3>
-                    <div className="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">
-                      Gói tài khoản tự động gia hạn, bảo hành trọn thời gian sử dụng.
-                    </div>
+                    <Link href={`/catalog/${product.id}`} className="block">
+                      <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        {product.name}
+                      </h3>
+                      <div className="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-2">
+                        Gói tài khoản tự động gia hạn, bảo hành trọn thời gian sử dụng.
+                      </div>
+                    </Link>
                     
                     <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                       <div className="flex flex-col">
